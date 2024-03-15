@@ -1,8 +1,17 @@
 package main
 
-import "github.com/Fabriciope/cli_chat/server/serverapp"
+import (
+	"log"
+
+	"github.com/Fabriciope/cli_chat/server/serverapp"
+)
 
 func main() {
-	server := serverapp.NewServer()
+	server, err := serverapp.NewServer()
+	if err != nil {
+		log.Panicln(err)
+		return
+	}
+	
 	server.InitServer()
 }

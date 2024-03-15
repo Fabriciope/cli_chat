@@ -1,8 +1,17 @@
 package main
 
-import "github.com/Fabriciope/cli_chat/client/clientapp"
+import (
+	"log"
+
+	"github.com/Fabriciope/cli_chat/client/clientapp"
+)
 
 func main() {
-	client := clientapp.NewClient()
+	client, err := clientapp.NewClient()
+	if err != nil {
+		log.Panicln(err)
+		return
+	}
+
 	client.InitChat()
 }

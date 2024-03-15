@@ -28,13 +28,12 @@ type Client struct {
 	loggedIn            bool
 }
 
-func NewClient() *Client {
+func NewClient() (*Client, error) {
 	remoteAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", remoteIp, remotePort))
 	localAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", localIp, localPort))
 	conn, err := net.DialTCP("tcp", localAddr, remoteAddr)
 	if err != nil {
-		log.Panicln(err)
-		return nil
+		return nil, err
 	}
 
 	return &Client{
@@ -42,7 +41,7 @@ func NewClient() *Client {
 		requestSender:       newRequestSender(conn),
 		responsesFromServer: make(chan shared.Response),
 		loggedIn:            false,
-	}
+	}, nil
 }
 
 func (client *Client) InitChat() {

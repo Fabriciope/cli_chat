@@ -22,11 +22,11 @@ type Server struct {
 	clients             map[net.Addr]*Client
 }
 
-func NewServer() *Server {
+func NewServer() (*Server, error) {
 	addr := &net.TCPAddr{IP: net.ParseIP(ip), Port: port}
 	listener, err := net.ListenTCP("tcp", addr)
 	if err != nil {
-		log.Panicln(err)
+		return nil, err
 	}
 
 	return &Server{
@@ -34,7 +34,7 @@ func NewServer() *Server {
 		listener:            listener,
 		handlersForRequests: make(handlersMap),
 		clients:             make(map[net.Addr]*Client),
-	}
+	}, nil
 }
 
 func (server *Server) InitServer() {
