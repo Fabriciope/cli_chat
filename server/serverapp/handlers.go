@@ -23,8 +23,8 @@ func newRequestHandlers(server *Server) *RequestHandlers {
 }
 
 func (rh *RequestHandlers) loginHandler(ctx context.Context, request shared.Request) *shared.Response {
-	var username string = strings.Trim(request.Payload, " ")
-	var loggedIn, payload = rh.service.login(ctx, username)
+	username := strings.Trim(request.Payload, " ")
+	loggedIn, payload := rh.service.login(ctx, username)
 	if loggedIn {
 		log.Printf("client %s logged\n\n", username)
 	} else {

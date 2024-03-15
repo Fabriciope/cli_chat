@@ -20,15 +20,15 @@ func newSender(server *Server) *Sender {
 }
 
 func (sender *Sender) propagateMessage(ctx context.Context, response shared.Response) {
-	var clients map[net.Addr]*Client = sender.server.clients
-	var conn *net.TCPConn = ctx.Value("connection").(*net.TCPConn)
-	var wg = &sync.WaitGroup{}
+	conn := ctx.Value("connection").(*net.TCPConn)
+	clients := sender.server.clients
+	var wg *sync.WaitGroup
 	wg.Add(len(clients) - 1)
 
 	var send = func(receiver *net.TCPConn, response shared.Response, wg *sync.WaitGroup) {
 		defer wg.Done()
 
-		var responseJson, _ = json.Marshal(response)
+		responseJson, _ := json.Marshal(response)
 		receiver.Write([]byte(responseJson))
 	}
 
@@ -44,7 +44,7 @@ func (sender *Sender) propagateMessage(ctx context.Context, response shared.Resp
 }
 
 func (sender *Sender) sendMessage(receiver *net.TCPConn, response shared.Response) (err error) {
-	var responseJson, _ = json.Marshal(response)
+	responseJson, _ := json.Marshal(response)
 
 	sender.server.lock()
 	_, err = receiver.Write(responseJson)

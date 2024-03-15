@@ -23,8 +23,8 @@ type Server struct {
 }
 
 func NewServer() *Server {
-	var addr = &net.TCPAddr{IP: net.ParseIP(ip), Port: port}
-	var listener, err = net.ListenTCP("tcp", addr)
+	addr := &net.TCPAddr{IP: net.ParseIP(ip), Port: port}
+	listener, err := net.ListenTCP("tcp", addr)
 	if err != nil {
 		log.Panicln(err)
 	}
@@ -38,7 +38,7 @@ func NewServer() *Server {
 }
 
 func (server *Server) InitServer() {
-	var handlers *RequestHandlers = newRequestHandlers(server)
+	handlers := newRequestHandlers(server)
 	server.setHandlerForEachRequest(handlers)
 	server.run()
 }
@@ -52,32 +52,33 @@ func (server *Server) setHandlerForEachRequest(handlers *RequestHandlers) {
 func (server *Server) run() {
 	log.Printf("started server at :%d\n", port)
 	for {
-		var conn, err = server.listener.AcceptTCP()
+		conn, err := server.listener.AcceptTCP()
 		if err != nil {
 			return
 		}
-		
-		var key string = "connection"
-		var context = context.WithValue(context.Background(), key, conn)
+
+		type myKey string
+		var key myKey = "connection"
+		context := context.WithValue(context.Background(), key, conn)
 		go server.clientHandler(context)
 	}
 }
 
 func (server *Server) clientHandler(ctx context.Context) {
-	var conn *net.TCPConn = ctx.Value("connection").(*net.TCPConn)
+	conn := ctx.Value("connection").(*net.TCPConn)
 	log.Printf("new client from %s\n", conn.RemoteAddr().String())
 	defer conn.Close()
 
-	var sender *Sender = newSender(server)
+	sender := newSender(server)
 	for {
 		var buf [1024]byte
-		var bufSize, err = conn.Read(buf[0:])
+		bufSize, err := conn.Read(buf[0:])
 		if err != nil {
 			return
 		}
 
 		var request shared.Request
-		
+
 		if err = json.Unmarshal(buf[:bufSize], &request); err != nil {
 			sender.sendMessage(conn, shared.Response{
 				Name:    "unknown",
@@ -98,6 +99,7 @@ func (server *Server) clientHandler(ctx context.Context) {
 func (server *Server) handleRequest(ctx context.Context, request shared.Request) *shared.Response {
 	for actionName, handler := range server.handlersForRequests {
 		if actionName == request.Name {
+			// TODO: serealizar os dados de entrada
 			return handler(ctx, request)
 		}
 	}

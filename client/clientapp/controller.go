@@ -19,13 +19,13 @@ type controller struct {
 }
 
 func newController(client *Client) *controller {
-	var controller = &controller{
+	controller := &controller{
 		inputsHandlers:    make(inputsHandlersMap),
 		responsesHandlers: make(responsesHandlersMap),
 		client:            client,
 	}
 
-	var handlers *handler = newHandlers(client)
+	handlers := newHandlers(client)
 	controller.setHandlerForEachInput(handlers)
 	controller.setHandlerForEachResponse(handlers)
 
@@ -71,6 +71,6 @@ func (controller *controller) catchResponsesAndHandle() {
 		}
 
 		controller.responseHandler(response.Name)(response)
-			
+
 	}
 }

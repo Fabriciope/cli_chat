@@ -20,7 +20,7 @@ func newRequestSender(conn *net.TCPConn) *requestSender {
 }
 
 func (sender *requestSender) sendRequest(request shared.Request) error {
-	var requestJson, err = json.Marshal(request)
+	requestJson, err := json.Marshal(request)
 	if err != nil {
 		return err
 	}

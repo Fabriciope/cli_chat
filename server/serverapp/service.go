@@ -36,8 +36,8 @@ func (service *Service) addClient(ctx context.Context, username string) error {
 		return errors.New("user already exists")
 	}
 
-	var conn *net.TCPConn = ctx.Value("connection").(*net.TCPConn)
-	var client *Client = newClient(conn, username)
+	conn := ctx.Value("connection").(*net.TCPConn)
+	client := newClient(conn, username)
 
 	service.server.lock()
 	service.server.clients[conn.RemoteAddr()] = client

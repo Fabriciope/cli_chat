@@ -29,9 +29,9 @@ type Client struct {
 }
 
 func NewClient() *Client {
-	var remoteAddr, _ = net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", remoteIp, remotePort))
-	var localAddr, _ = net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", localIp, localPort))
-	var conn, err = net.DialTCP("tcp", localAddr, remoteAddr)
+	remoteAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", remoteIp, remotePort))
+	localAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", localIp, localPort))
+	conn, err := net.DialTCP("tcp", localAddr, remoteAddr)
 	if err != nil {
 		log.Panicln(err)
 		return nil
@@ -48,14 +48,15 @@ func NewClient() *Client {
 func (client *Client) InitChat() {
 	defer client.connection.Close()
 
-	var controller = newController(client)
+	controller := newController(client)
 
+	// TODO: trocar lógica de cominicação com o servidor
 	go client.listenToServer()
 	go controller.catchResponsesAndHandle()
 
-	var inputScanner *bufio.Scanner = bufio.NewScanner(os.Stdin)
+	inputScanner := bufio.NewScanner(os.Stdin)
 
-	var loginHandler inputHandler = controller.inputHandler(shared.LoginActionName)
+	loginHandler := controller.inputHandler(shared.LoginActionName)
 	if err := client.login(inputScanner, loginHandler); err != nil {
 		log.Fatal(err.Error())
 	}
@@ -66,7 +67,7 @@ func (client *Client) InitChat() {
 func (client *Client) listenToServer() {
 	for {
 		var buf = make([]byte, 1024)
-		var n, err = client.connection.Read(buf)
+		n, err := client.connection.Read(buf)
 		if err != nil {
 			return
 		}
@@ -83,7 +84,7 @@ func (client *Client) listenToServer() {
 func (client *Client) login(inputScanner *bufio.Scanner, handler inputHandler) error {
 	fmt.Print("Enter with your username: ")
 	for inputScanner.Scan() {
-		var username string = strings.Trim(inputScanner.Text(), " ")
+		username := strings.Trim(inputScanner.Text(), " ")
 		if username == "" {
 			fmt.Println("Err: invalid username ↑")
 			fmt.Print("Enter with your username again: ")
@@ -104,7 +105,7 @@ func (client *Client) listenToInput(inputScanner *bufio.Scanner, controller *con
 			return
 		}
 
-		var err error = controller.handleInput(inputScanner.Text())
+		err := controller.handleInput(inputScanner.Text())
 		if err != nil {
 			fmt.Println(err.Error())
 		}
