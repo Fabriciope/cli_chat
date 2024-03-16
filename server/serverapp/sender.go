@@ -22,7 +22,7 @@ func newSender(server *Server) *Sender {
 func (sender *Sender) propagateMessage(ctx context.Context, response shared.Response) {
 	conn := ctx.Value("connection").(*net.TCPConn)
 	clients := sender.server.clients
-	var wg *sync.WaitGroup
+	wg := new(sync.WaitGroup)
 	wg.Add(len(clients) - 1)
 
 	var send = func(receiver *net.TCPConn, response shared.Response, wg *sync.WaitGroup) {
