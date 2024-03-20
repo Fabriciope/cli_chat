@@ -1,80 +1,98 @@
 package cui
 
 import (
-	"strconv"
+	"errors"
+	"fmt"
 	"strings"
 )
 
 type escapeCode string
 
 const (
-	reset escapeCode = "\033[0m"
+	reset escapeCode = "\x1b[0m"
 
-	clearScreen   escapeCode = "\033[2J"
-	moveHome      escapeCode = "\033[H"
-	moveCursor    escapeCode = "\033[{lines};{columns}H"
-	moveUp        escapeCode = "\033[{n}A"
-	moveDown      escapeCode = "\033[{n}B"
-	moveRight     escapeCode = "\033[{n}C"
-	moveLeft      escapeCode = "\033[{n}D"
-	moveNextLine  escapeCode = "\033[E"
-	movePrevLine  escapeCode = "\033[F"
-	saveCursor    escapeCode = "\033[s"
-	restoreCursor escapeCode = "\033[u"
-	hideCursor    escapeCode = "\033[?25l"
-	showCursor    escapeCode = "\033[?25h"
+	clearScreen   escapeCode = "\x1b[2J"
+	moveHome      escapeCode = "\x1b[H"
+	moveCursor    escapeCode = "\x1b[{lines};{columns}H"
+	moveUp        escapeCode = "\x1b[{n}A"
+	moveDown      escapeCode = "\x1b[{n}B"
+	moveRight     escapeCode = "\x1b[{n}C"
+	moveLeft      escapeCode = "\x1b[{n}D"
+	moveNextLine  escapeCode = "\x1b[E"
+	movePrevLine  escapeCode = "\x1b[F"
+	saveCursor    escapeCode = "\x1b[s"
+	restoreCursor escapeCode = "\x1b[u"
+	hideCursor    escapeCode = "\x1b[?25l"
+	showCursor    escapeCode = "\x1b[?25h"
 
-	bold       escapeCode = "\033[1m"
-	dim        escapeCode = "\033[2m"
-	italic     escapeCode = "\033[3m"
-	underline  escapeCode = "\033[4m"
-	blink      escapeCode = "\033[5m"
-	reverse    escapeCode = "\033[7m"
-	hidden     escapeCode = "\033[8m"
-	crossedOut escapeCode = "\033[9m"
+	bold       escapeCode = "\x1b[1m"
+	dim        escapeCode = "\x1b[2m"
+	italic     escapeCode = "\x1b[3m"
+	underline  escapeCode = "\x1b[4m"
+	blink      escapeCode = "\x1b[5m"
+	reverse    escapeCode = "\x1b[7m"
+	hidden     escapeCode = "\x1b[8m"
+	crossedOut escapeCode = "\x1b[9m"
 
-	defaultColor  escapeCode = "\033[39m"
-	black         escapeCode = "\033[30m"
-	red           escapeCode = "\033[31m"
-	green         escapeCode = "\033[32m"
-	yellow        escapeCode = "\033[33m"
-	blue          escapeCode = "\033[34m"
-	magenta       escapeCode = "\033[35m"
-	cyan          escapeCode = "\033[36m"
-	lightGray     escapeCode = "\033[37m"
-	darkGray      escapeCode = "\033[90m"
-	brightRed     escapeCode = "\033[91m"
-	brightGreen   escapeCode = "\033[92m"
-	brightYellow  escapeCode = "\033[93m"
-	brightBlue    escapeCode = "\033[94m"
-	brightMagenta escapeCode = "\033[95m"
-	brightCyan    escapeCode = "\033[96m"
-	white         escapeCode = "\033[97m"
+	DefaultColor  escapeCode = "\x1b[39m"
+	Black         escapeCode = "\x1b[30m"
+	Red           escapeCode = "\x1b[31m"
+	Green         escapeCode = "\x1b[32m"
+	Yellow        escapeCode = "\x1b[33m"
+	Blue          escapeCode = "\x1b[34m"
+	Magenta       escapeCode = "\x1b[35m"
+	Cyan          escapeCode = "\x1b[36m"
+	LightGray     escapeCode = "\x1b[37m"
+	DarkGray      escapeCode = "\x1b[90m"
+	BrightRed     escapeCode = "\x1b[91m"
+	BrightGreen   escapeCode = "\x1b[92m"
+	BrightYellow  escapeCode = "\x1b[93m"
+	BrightBlue    escapeCode = "\x1b[94m"
+	BrightMagenta escapeCode = "\x1b[95m"
+	BrightCyan    escapeCode = "\x1b[96m"
+	White         escapeCode = "\x1b[97m"
 
-	defaultBackground escapeCode = "\033[49m"
-	bgBlack           escapeCode = "\033[40m"
-	bgRed             escapeCode = "\033[41m"
-	bgGreen           escapeCode = "\033[42m"
-	bgYellow          escapeCode = "\033[43m"
-	bgBlue            escapeCode = "\033[44m"
-	bgMagenta         escapeCode = "\033[45m"
-	bgCyan            escapeCode = "\033[46m"
-	bgLightGray       escapeCode = "\033[47m"
-	bgDarkGray        escapeCode = "\033[100m"
-	bgBrightRed       escapeCode = "\033[101m"
-	bgBrightGreen     escapeCode = "\033[102m"
-	bgBrightYellow    escapeCode = "\033[103m"
-	bgBrightBlue      escapeCode = "\033[104m"
-	bgBrightMagenta   escapeCode = "\033[105m"
-	bgBrightCyan      escapeCode = "\033[106m"
-	bgWhite           escapeCode = "\033[107m"
+	DefaultBackground escapeCode = "\x1b[49m"
+	BgBlack           escapeCode = "\x1b[40m"
+	BgRed             escapeCode = "\x1b[41m"
+	BgGreen           escapeCode = "\x1b[42m"
+	BgYellow          escapeCode = "\x1b[43m"
+	BgBlue            escapeCode = "\x1b[44m"
+	BgMagenta         escapeCode = "\x1b[45m"
+	BgCyan            escapeCode = "\x1b[46m"
+	BgLightGray       escapeCode = "\x1b[47m"
+	BgDarkGray        escapeCode = "\x1b[100m"
+	BgBrightRed       escapeCode = "\x1b[101m"
+	BgBrightGreen     escapeCode = "\x1b[102m"
+	BgBrightYellow    escapeCode = "\x1b[103m"
+	BgBrightBlue      escapeCode = "\x1b[104m"
+	BgBrightMagenta   escapeCode = "\x1b[105m"
+	BgBrightCyan      escapeCode = "\x1b[106m"
+	BgWhite           escapeCode = "\x1b[107m"
 )
 
-func getEscapeCode(code escapeCode, numberToReplace int16) string {
-	var firstIndex int = strings.Index(string(code), "{")
-	var lastIndex int = strings.LastIndex(string(code), "}")
+func replaceInEscapeCode[T string | int16](code escapeCode, replaces map[string]T) (string, error) {
+	c := string(code)
+	if !strings.Contains(c, "{") || !strings.Contains(c, "}") {
+		return "", errors.New("invalid code")
+	}
 
-	var number escapeCode = escapeCode(strconv.Itoa(int(numberToReplace)))
+	var newCode string
 
-	return string(code[:firstIndex] + number + code[lastIndex+1:])
+	first := true
+	for key, replace := range replaces {
+		key = fmt.Sprintf("{%s}", key)
+		if !strings.Contains(c, key) {
+			return "", errors.New("invalid replaces")
+		}
+
+		if first {
+			newCode = strings.Replace(c, key, fmt.Sprint(replace), 1)
+			first = false
+		} else {
+			newCode = strings.Replace(newCode, key, fmt.Sprint(replace), 1)
+		}
+	}
+
+	return newCode, nil
 }
