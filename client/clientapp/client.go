@@ -57,6 +57,7 @@ func NewClient() (*Client, error) {
 func (client *Client) InitChat() {
 	defer client.connection.Close()
 
+	// TODO: tirar a tela de carregamento
 	err := client.cui.DrawLoading(100, cui.Magenta)
 	if err != nil {
 		log.Panicln(err.Error())
@@ -65,8 +66,7 @@ func (client *Client) InitChat() {
 	controller := newController(client)
 	inputScanner := bufio.NewScanner(os.Stdin)
 
-	loginHandler := controller.inputHandler(shared.LoginActionName)
-	client.login(inputScanner, loginHandler)
+	client.login(inputScanner, controller.loginHandler())
 
 	// TODO: trocar lógica de cominicação com o servidor
 	go client.listenToServer()
@@ -75,7 +75,7 @@ func (client *Client) InitChat() {
 	client.listenToInput(inputScanner, controller)
 }
 
-func (client *Client) login(inputScanner *bufio.Scanner, handler inputHandler) {
+func (client *Client) login(inputScanner *bufio.Scanner, handler func(string) error) {
 	client.cui.DrawLoginInterface()
 
 	for inputScanner.Scan() {
@@ -85,7 +85,13 @@ func (client *Client) login(inputScanner *bufio.Scanner, handler inputHandler) {
 			continue
 		}
 
-		handler(username)
+		err := handler(username)
+		if err != nil {
+			client.cui.DrawLoginError(err.Error())
+			continue
+		}
+
+		return
 	}
 }
 
@@ -108,7 +114,6 @@ func (client *Client) listenToServer() {
 
 func (client *Client) listenToInput(inputScanner *bufio.Scanner, controller *controller) {
 	for {
-		fmt.Print("--> ")
 		if !inputScanner.Scan() || inputScanner.Err() == nil {
 			return
 		}
@@ -120,6 +125,16 @@ func (client *Client) listenToInput(inputScanner *bufio.Scanner, controller *con
 	}
 }
 
-func (client *Client) awaitResponseFromServer() {
+func (client *Client) awaitResponseFromServer() (responseFromServer shared.Response, err error) {
+	var buf = make([]byte, 1024)
+	n, err := client.connection.Read(buf)
+	if err != nil {
+		return
+	}
 
+	if err = json.Unmarshal(buf[:n], &responseFromServer); err != nil {
+		return
+	}
+
+	return
 }

@@ -1,76 +1,92 @@
 package clientapp
 
 import (
+	"errors"
 	"log"
+	"strings"
 
 	"github.com/Fabriciope/cli_chat/shared"
 )
 
-type inputsHandlersMap map[string]func(string)
-type inputHandler func(string)
-type responsesHandlersMap map[string]func(shared.Response)
+type commandHandler func() error
+type commandsHandlersMap map[string]commandHandler
 type responseHandler func(shared.Response)
+type responsesHandlersMap map[string]responseHandler
 
 type controller struct {
-	inputsHandlers    inputsHandlersMap
+	commandsHandlers  commandsHandlersMap
 	responsesHandlers responsesHandlersMap
+	handler           *handler
 
-	client *Client
+	responsesFromServer <-chan shared.Response
 }
 
 func newController(client *Client) *controller {
 	controller := &controller{
-		inputsHandlers:    make(inputsHandlersMap),
-		responsesHandlers: make(responsesHandlersMap),
-		client:            client,
+		commandsHandlers:    make(commandsHandlersMap),
+		responsesHandlers:   make(responsesHandlersMap),
+		handler:             newHandler(client),
+		responsesFromServer: client.responsesFromServer,
 	}
 
-	handlers := newHandlers(client)
-	controller.setHandlerForEachInput(handlers)
-	controller.setHandlerForEachResponse(handlers)
+	controller.setHandlerForEachCommand()
+	controller.setHandlerForEachResponse()
 
 	return controller
 }
 
-func (controller *controller) setHandlerForEachInput(handlers *handler) {
-	controller.inputsHandlers = inputsHandlersMap{
-		shared.LoginActionName: handlers.loginInputHandler,
+func (controller *controller) setHandlerForEachCommand() {
+	controller.commandsHandlers = commandsHandlersMap{
+		// TODO: add comands and handlers
 	}
 }
 
-func (controller *controller) setHandlerForEachResponse(handlers *handler) {
+func (controller *controller) setHandlerForEachResponse() {
 	controller.responsesHandlers = responsesHandlersMap{
-		shared.LoginActionName: handlers.loginResponseHandler,
+		shared.LoginActionName: controller.handler.loginResponseHandler,
 	}
 }
 
-func (controller *controller) inputHandler(actionName string) inputHandler {
-	return (*controller).inputsHandlers[actionName]
+func (controller *controller) commandHandler(actionName string) (commandHandler, bool) {
+	handler, exists := (*controller).commandsHandlers[actionName]
+	return handler, exists
 }
 
-func (controller *controller) responseHandler(actionName string) responseHandler {
-	return (*controller).responsesHandlers[actionName]
+func (controller *controller) responseHandler(actionName string) (responseHandler, bool) {
+	handler, exists := (*controller).responsesHandlers[actionName]
+	return handler, exists
 }
 
-// TODO: quando estiver dentro do chat mudar o comeco do input para type message:
+func (controller *controller) loginHandler() func(string) error {
+	return controller.handler.loginHandler
+}
 
 func (controller *controller) handleInput(input string) error {
-	switch input {
-	case "logout":
-		return nil
-	default:
-		return nil
+	if strings.HasPrefix(input, ":") {
+		return controller.findHandlerAndRun(input)
 	}
+
+	return controller.handler.sendMessageInChat(input)
+}
+
+func (controller *controller) findHandlerAndRun(command string) error {
+	handler, exists := controller.commandHandler(command)
+	if !exists {
+		return errors.New("this command does not exist")
+	}
+
+	return handler()
 }
 
 func (controller *controller) catchResponsesAndHandle() {
-	for response := range controller.client.responsesFromServer {
+	for response := range controller.responsesFromServer {
 		if response.Err {
+			// TODO: jogar todos os logs para um arquivo e tratar o erro de outra maneira
 			log.Fatalf("error name: %s - msg: %s", response.Name, response.Payload)
 			return
 		}
 
-		controller.responseHandler(response.Name)(response)
-
+		handler, _ := controller.responseHandler(response.Name)
+		handler(response)
 	}
 }
