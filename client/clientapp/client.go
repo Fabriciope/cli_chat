@@ -3,16 +3,17 @@ package clientapp
 import (
 	"bufio"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"strings"
 
+	"github.com/Fabriciope/cli_chat/client/clientapp/cui"
 	"github.com/Fabriciope/cli_chat/shared"
 )
 
+// TODO: colocar como variaveis globais no container
 const (
 	remoteIp   = "localhost"
 	remotePort = 5000
@@ -26,12 +27,19 @@ type Client struct {
 	requestSender       sender
 	responsesFromServer chan shared.Response
 	loggedIn            bool
+
+	cui *cui.CUI
 }
 
 func NewClient() (*Client, error) {
 	remoteAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", remoteIp, remotePort))
-	localAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", localIp, localPort))
-	conn, err := net.DialTCP("tcp", localAddr, remoteAddr)
+	//localAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", localIp, localPort))
+	conn, err := net.DialTCP("tcp", nil, remoteAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	cui, err := cui.NewCUI()
 	if err != nil {
 		return nil, err
 	}
@@ -41,26 +49,44 @@ func NewClient() (*Client, error) {
 		requestSender:       newRequestSender(conn),
 		responsesFromServer: make(chan shared.Response),
 		loggedIn:            false,
+		cui:                 cui,
 	}, nil
 }
 
+// TODO: retornar error para tratar no main
 func (client *Client) InitChat() {
 	defer client.connection.Close()
 
+	err := client.cui.DrawLoading(100, cui.Magenta)
+	if err != nil {
+		log.Panicln(err.Error())
+	}
+
 	controller := newController(client)
+	inputScanner := bufio.NewScanner(os.Stdin)
+
+	loginHandler := controller.inputHandler(shared.LoginActionName)
+	client.login(inputScanner, loginHandler)
 
 	// TODO: trocar lógica de cominicação com o servidor
 	go client.listenToServer()
 	go controller.catchResponsesAndHandle()
 
-	inputScanner := bufio.NewScanner(os.Stdin)
-
-	loginHandler := controller.inputHandler(shared.LoginActionName)
-	if err := client.login(inputScanner, loginHandler); err != nil {
-		log.Fatal(err.Error())
-	}
-
 	client.listenToInput(inputScanner, controller)
+}
+
+func (client *Client) login(inputScanner *bufio.Scanner, handler inputHandler) {
+	client.cui.DrawLoginInterface()
+
+	for inputScanner.Scan() {
+		username := strings.Trim(inputScanner.Text(), " ")
+		if username == "" {
+			client.cui.DrawLoginError("invalid username!")
+			continue
+		}
+
+		handler(username)
+	}
 }
 
 func (client *Client) listenToServer() {
@@ -80,23 +106,6 @@ func (client *Client) listenToServer() {
 	}
 }
 
-func (client *Client) login(inputScanner *bufio.Scanner, handler inputHandler) error {
-	fmt.Print("Enter with your username: ")
-	for inputScanner.Scan() {
-		username := strings.Trim(inputScanner.Text(), " ")
-		if username == "" {
-			fmt.Println("Err: invalid username ↑")
-			fmt.Print("Enter with your username again: ")
-			continue
-		}
-
-		handler(username)
-		return nil
-	}
-
-	return errors.New("cannot get the username")
-}
-
 func (client *Client) listenToInput(inputScanner *bufio.Scanner, controller *controller) {
 	for {
 		fmt.Print("--> ")
@@ -109,4 +118,8 @@ func (client *Client) listenToInput(inputScanner *bufio.Scanner, controller *con
 			fmt.Println(err.Error())
 		}
 	}
+}
+
+func (client *Client) awaitResponseFromServer() {
+
 }
