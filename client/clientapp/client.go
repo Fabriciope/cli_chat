@@ -56,17 +56,12 @@ func NewClient() (*Client, error) {
 func (client *Client) InitChat() {
 	defer client.connection.Close()
 
-	//	err := client.cui.DrawLoading(100, cui.Magenta)
-	//	if err != nil {
-	//		log.Panicln(err.Error())
-	//	}
+	go client.cui.InitApp()
 
 	controller := newController(client)
 	inputScanner := bufio.NewScanner(os.Stdin)
 
 	client.login(inputScanner, controller.loginHandler())
-
-    client.cui.DrawConsoleUserInterface()
 
 	go client.listenToServer()
 	go controller.catchResponsesAndHandle()
@@ -75,8 +70,6 @@ func (client *Client) InitChat() {
 }
 
 func (client *Client) login(inputScanner *bufio.Scanner, handler func(string) error) {
-	client.cui.DrawLoginInterface()
-
 	for inputScanner.Scan() {
 		username := strings.Trim(inputScanner.Text(), " ")
 		if username == "" {

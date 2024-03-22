@@ -19,7 +19,7 @@ func newHandler(client *Client) *handler {
 }
 
 func (handler *handler) loginHandler(username string) error {
-	request := shared.Request{Name:shared.LoginActionName, Payload: username}
+	request := shared.Request{Name: shared.LoginActionName, Payload: username}
 	err := handler.sender.sendRequest(request)
 	if err != nil {
 		return err
@@ -34,12 +34,13 @@ func (handler *handler) loginHandler(username string) error {
 }
 
 func (handler *handler) loginResponseHandler(response shared.Response) error {
-    if response.Err {
-        return errors.New(response.Payload.(string))
-    }
+	if response.Err {
+		return errors.New(response.Payload.(string))
+	}
 
-    handler.client.loggedIn = true
-    return nil
+	handler.client.loggedIn = true
+    handler.client.cui.SetLoggedAs(true)
+	return nil
 }
 
 func (handler *handler) sendMessageInChat(message string) error {

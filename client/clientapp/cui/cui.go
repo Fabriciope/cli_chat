@@ -23,11 +23,22 @@ var cliChatText = [10]string{
 
 const cliChatTextWidth = 54
 
+var interfaces = [2]string{"login", "chat"}
+
+const (
+	Login = iota
+	Chat
+)
+
 type CUI struct {
 	consoleHeight uint16
 	consoleWidth  uint16
 
 	sizeListener *tsize.SizeListener
+
+	currentInterface string
+
+	logged chan bool
 }
 
 func NewCUI() (*CUI, error) {
@@ -45,14 +56,57 @@ func NewCUI() (*CUI, error) {
 		consoleHeight: uint16(size.Height),
 		consoleWidth:  uint16(size.Width),
 		sizeListener:  listener,
+		logged:        make(chan bool),
 	}
-
-	go cui.listenToConsoleSize()
 
 	return cui, nil
 }
 
-func (cui *CUI) DrawLoginInterface() {
+func (cui *CUI) SetLoggedAs(logged bool) {
+	cui.logged <- logged
+}
+
+func (cui *CUI) InitApp() {
+	cui.drawLoginInterface()
+	go cui.listenToConsoleSize()
+
+	if logged := <-cui.logged; logged {
+		cui.currentInterface = interfaces[Chat]
+		cui.drawConsoleUserInterface()
+	}
+}
+
+func (cui *CUI) listenToConsoleSize() {
+	for newSize := range cui.sizeListener.Change {
+		cui.updateConsoleSize(newSize)
+		cui.adaptNewConsoleSize()
+	}
+}
+
+func (cui *CUI) updateConsoleSize(newSize tsize.Size) {
+	cui.consoleWidth = uint16(newSize.Width)
+	cui.consoleHeight = uint16(newSize.Height)
+	fmt.Print(cui.consoleWidth, "-", cui.consoleHeight)
+}
+
+func (cui *CUI) adaptNewConsoleSize() {
+	switch cui.currentInterface {
+	case "login":
+		cui.drawLoginInterface()
+	case "chat":
+		cui.drawConsoleUserInterface()
+	}
+}
+
+//func (cui *CUI) adaptLoginInterfaceToNewSize() {
+//
+//}
+//
+//func (cui *CUI) adaptChatInterfaceToNewSize() {
+//    // TODO: quando for adptar cortar a partir da direita
+//}
+
+func (cui *CUI) drawLoginInterface() {
 	designer := newConsoleDesigner()
 	designer.clearTerminal()
 
@@ -71,6 +125,8 @@ func (cui *CUI) DrawLoginInterface() {
 		moveCursor(coordinates{
 			x: 9, y: y + 16,
 		})
+
+	cui.currentInterface = interfaces[Login]
 }
 
 func (cui *CUI) DrawLoginError(message string) {
@@ -80,6 +136,8 @@ func (cui *CUI) DrawLoginError(message string) {
 	designer.setDrawing(message).setColor(Red).print()
 	designer.resetColors()
 
+	// TODO: limpar login anterior
+
 	designer.resetColors()
 	designer.
 		setCursorColor(White).
@@ -88,16 +146,13 @@ func (cui *CUI) DrawLoginError(message string) {
 		})
 }
 
-// func (cui *CUI) InitApp() {
-// 	cui.drawConsoleUserInterface()
-// }
-
-func (cui *CUI) DrawConsoleUserInterface() {
+func (cui *CUI) drawConsoleUserInterface() {
 	// TODO: do this after login
+	fmt.Print("start chat interface")
 }
 
 // TODO: testar
-func (cui *CUI) DrawLoading(length uint, color escapeCode) error {
+func (cui *CUI) drawLoading(length uint, color escapeCode) error {
 	designer := newConsoleDesigner()
 	designer.setColor(color)
 
@@ -131,14 +186,4 @@ func (cui *CUI) DrawLoading(length uint, color escapeCode) error {
 	designer.resetColors()
 
 	return nil
-}
-
-func (cui *CUI) listenToConsoleSize() {
-	for size := range cui.sizeListener.Change {
-		cui.adaptNewConsoleSize(size)
-	}
-}
-
-func (cui *CUI) adaptNewConsoleSize(size tsize.Size) {
-	// TODO: do this
 }
