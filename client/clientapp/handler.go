@@ -1,7 +1,7 @@
 package clientapp
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/Fabriciope/cli_chat/shared"
 )
@@ -30,12 +30,16 @@ func (handler *handler) loginHandler(username string) error {
 		return err
 	}
 
-	handler.loginResponseHandler(response)
-	return nil
+	return handler.loginResponseHandler(response)
 }
 
-func (handler *handler) loginResponseHandler(response shared.Response) {
-	fmt.Println(response)
+func (handler *handler) loginResponseHandler(response shared.Response) error {
+    if response.Err {
+        return errors.New(response.Payload.(string))
+    }
+
+    handler.client.loggedIn = true
+    return nil
 }
 
 func (handler *handler) sendMessageInChat(message string) error {

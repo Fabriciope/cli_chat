@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"strings"
@@ -57,18 +56,18 @@ func NewClient() (*Client, error) {
 func (client *Client) InitChat() {
 	defer client.connection.Close()
 
-	// TODO: tirar a tela de carregamento
-	err := client.cui.DrawLoading(100, cui.Magenta)
-	if err != nil {
-		log.Panicln(err.Error())
-	}
+	//	err := client.cui.DrawLoading(100, cui.Magenta)
+	//	if err != nil {
+	//		log.Panicln(err.Error())
+	//	}
 
 	controller := newController(client)
 	inputScanner := bufio.NewScanner(os.Stdin)
 
 	client.login(inputScanner, controller.loginHandler())
 
-	// TODO: trocar lógica de cominicação com o servidor
+    client.cui.DrawConsoleUserInterface()
+
 	go client.listenToServer()
 	go controller.catchResponsesAndHandle()
 
@@ -87,7 +86,7 @@ func (client *Client) login(inputScanner *bufio.Scanner, handler func(string) er
 
 		err := handler(username)
 		if err != nil {
-			client.cui.DrawLoginError(err.Error())
+			client.cui.DrawLoginError(err.Error() + ", try again.")
 			continue
 		}
 
@@ -118,10 +117,7 @@ func (client *Client) listenToInput(inputScanner *bufio.Scanner, controller *con
 			return
 		}
 
-		err := controller.handleInput(inputScanner.Text())
-		if err != nil {
-			fmt.Println(err.Error())
-		}
+		controller.handleInput(inputScanner.Text())
 	}
 }
 
