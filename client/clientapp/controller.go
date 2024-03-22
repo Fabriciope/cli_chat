@@ -1,7 +1,6 @@
 package clientapp
 
 import (
-	"errors"
 	"log"
 	"strings"
 
@@ -18,15 +17,15 @@ type controller struct {
 	responsesHandlers responsesHandlersMap
 	handler           *handler
 
-	responsesFromServer <-chan shared.Response
+	client *Client
 }
 
 func newController(client *Client) *controller {
 	controller := &controller{
-		commandsHandlers:    make(commandsHandlersMap),
-		responsesHandlers:   make(responsesHandlersMap),
-		handler:             newHandler(client),
-		responsesFromServer: client.responsesFromServer,
+		commandsHandlers:  make(commandsHandlersMap),
+		responsesHandlers: make(responsesHandlersMap),
+		handler:           newHandler(client),
+		client:            client,
 	}
 
 	controller.setHandlerForEachCommand()
@@ -42,9 +41,7 @@ func (controller *controller) setHandlerForEachCommand() {
 }
 
 func (controller *controller) setHandlerForEachResponse() {
-	controller.responsesHandlers = responsesHandlersMap{
-		shared.LoginActionName: controller.handler.loginResponseHandler,
-	}
+	controller.responsesHandlers = responsesHandlersMap{}
 }
 
 func (controller *controller) commandHandler(actionName string) (commandHandler, bool) {
@@ -61,26 +58,27 @@ func (controller *controller) loginHandler() func(string) error {
 	return controller.handler.loginHandler
 }
 
-func (controller *controller) handleInput(input string) error {
+func (controller *controller) handleInput(input string) {
 	if strings.HasPrefix(input, ":") {
-		return controller.findHandlerAndRun(input)
+		controller.findHandlerAndRun(input)
+		return
 	}
 
-	return controller.handler.sendMessageInChat(input)
+	controller.handler.sendMessageInChat(input)
 }
 
-func (controller *controller) findHandlerAndRun(command string) error {
+func (controller *controller) findHandlerAndRun(command string) {
 	handler, exists := controller.commandHandler(command)
 	if !exists {
-		return errors.New("this command does not exist")
+        // TODO: this command does not exists
 	}
 
-	return handler()
+	handler()
 }
 
 func (controller *controller) catchResponsesAndHandle() {
-	for response := range controller.responsesFromServer {
-		if response.Err {
+	for response := range controller.client.responsesFromServer {
+		if response.Err && response.Name == "unknown" {
 			// TODO: jogar todos os logs para um arquivo e tratar o erro de outra maneira
 			log.Fatalf("error name: %s - msg: %s", response.Name, response.Payload)
 			return
