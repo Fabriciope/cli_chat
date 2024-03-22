@@ -22,12 +22,12 @@ const (
 )
 
 type Client struct {
-	connection          *net.TCPConn
-	requestSender       sender
-	responsesFromServer chan shared.Response
-	loggedIn            bool
+	connection   *net.TCPConn
+	inputScanner *bufio.Scanner
 
 	cui *cui.CUI
+
+	loggedIn bool
 }
 
 func NewClient() (*Client, error) {
@@ -44,11 +44,10 @@ func NewClient() (*Client, error) {
 	}
 
 	return &Client{
-		connection:          conn,
-		requestSender:       newRequestSender(conn),
-		responsesFromServer: make(chan shared.Response),
-		loggedIn:            false,
-		cui:                 cui,
+		connection:   conn,
+		inputScanner: bufio.NewScanner(os.Stdin),
+		cui:          cui,
+		loggedIn:     false,
 	}, nil
 }
 
@@ -59,19 +58,16 @@ func (client *Client) InitChat() {
 	go client.cui.InitApp()
 
 	controller := newController(client)
-	inputScanner := bufio.NewScanner(os.Stdin)
 
-	client.login(inputScanner, controller.loginHandler())
+	client.login(controller.loginHandler())
 
-	go client.listenToServer()
-	go controller.catchResponsesAndHandle()
-
-	client.listenToInput(inputScanner, controller)
+	go client.listenToServer(controller)
+	client.listenToInput(controller)
 }
 
-func (client *Client) login(inputScanner *bufio.Scanner, handler func(string) error) {
-	for inputScanner.Scan() {
-		username := strings.Trim(inputScanner.Text(), " ")
+func (client *Client) login(handler func(string) error) {
+	for client.inputScanner.Scan() {
+		username := strings.Trim(client.inputScanner.Text(), " ")
 		if username == "" {
 			client.cui.DrawLoginError("invalid username!")
 			continue
@@ -87,7 +83,7 @@ func (client *Client) login(inputScanner *bufio.Scanner, handler func(string) er
 	}
 }
 
-func (client *Client) listenToServer() {
+func (client *Client) listenToServer(controller *controller) {
 	for {
 		var buf = make([]byte, 1024)
 		n, err := client.connection.Read(buf)
@@ -100,17 +96,17 @@ func (client *Client) listenToServer() {
 			return
 		}
 
-		client.responsesFromServer <- responseFromServer
+		controller.handleResponse(responseFromServer)
 	}
 }
 
-func (client *Client) listenToInput(inputScanner *bufio.Scanner, controller *controller) {
+func (client *Client) listenToInput(controller *controller) {
 	for {
-		if !inputScanner.Scan() || inputScanner.Err() == nil {
+		if !client.inputScanner.Scan() || client.inputScanner.Err() == nil {
 			return
 		}
 
-		controller.handleInput(inputScanner.Text())
+		controller.handleInput(client.inputScanner.Text())
 	}
 }
 

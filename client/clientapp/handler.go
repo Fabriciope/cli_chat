@@ -14,7 +14,7 @@ type handler struct {
 func newHandler(client *Client) *handler {
 	return &handler{
 		client: client,
-		sender: client.requestSender,
+		sender: newRequestSender(client.connection),
 	}
 }
 

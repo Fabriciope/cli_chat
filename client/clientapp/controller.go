@@ -16,8 +16,6 @@ type controller struct {
 	commandsHandlers  commandsHandlersMap
 	responsesHandlers responsesHandlersMap
 	handler           *handler
-
-	client *Client
 }
 
 func newController(client *Client) *controller {
@@ -25,7 +23,6 @@ func newController(client *Client) *controller {
 		commandsHandlers:  make(commandsHandlersMap),
 		responsesHandlers: make(responsesHandlersMap),
 		handler:           newHandler(client),
-		client:            client,
 	}
 
 	controller.setHandlerForEachCommand()
@@ -76,8 +73,7 @@ func (controller *controller) findHandlerAndRun(command string) {
 	handler()
 }
 
-func (controller *controller) catchResponsesAndHandle() {
-	for response := range controller.client.responsesFromServer {
+func (controller *controller) handleResponse(response shared.Response) {
 		if response.Err && response.Name == "unknown" {
 			// TODO: jogar todos os logs para um arquivo e tratar o erro de outra maneira
 			log.Fatalf("error name: %s - msg: %s", response.Name, response.Payload)
@@ -86,5 +82,4 @@ func (controller *controller) catchResponsesAndHandle() {
 
 		handler, _ := controller.responseHandler(response.Name)
 		handler(response)
-	}
 }
