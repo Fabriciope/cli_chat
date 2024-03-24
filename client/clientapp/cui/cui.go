@@ -72,7 +72,7 @@ func (cui *CUI) InitApp() {
 
 	if logged := <-cui.logged; logged {
 		cui.currentInterface = interfaces[Chat]
-		cui.drawConsoleUserInterface()
+		cui.drawChatInterface()
 	}
 }
 
@@ -86,7 +86,6 @@ func (cui *CUI) listenToConsoleSize() {
 func (cui *CUI) updateConsoleSize(newSize tsize.Size) {
 	cui.consoleWidth = uint16(newSize.Width)
 	cui.consoleHeight = uint16(newSize.Height)
-	fmt.Print(cui.consoleWidth, "-", cui.consoleHeight)
 }
 
 func (cui *CUI) adaptNewConsoleSize() {
@@ -94,7 +93,7 @@ func (cui *CUI) adaptNewConsoleSize() {
 	case "login":
 		cui.drawLoginInterface()
 	case "chat":
-		cui.drawConsoleUserInterface()
+		cui.drawChatInterface()
 	}
 }
 
@@ -110,20 +109,18 @@ func (cui *CUI) drawLoginInterface() {
 	designer := newConsoleDesigner()
 	designer.clearTerminal()
 
-	var x int16 = 1
 	var y int16 = int16(cui.consoleWidth/2) - int16(cliChatTextWidth/2)
 	designer.setColor(Blue).print()
-	for _, text := range cliChatText {
-		designer.setCursorCoordinates(coordinates{x: x, y: y})
+	for currentLine, text := range cliChatText {
+		designer.setCursorCoordinates(coordinates{x: int16(currentLine + 2), y: y})
 		designer.setDrawing(text).print()
-		x++
 	}
 	designer.resetColors()
 
 	designer.
 		setCursorColor(White).
 		moveCursor(coordinates{
-			x: 9, y: y + 16,
+			x: 10, y: y + 16,
 		})
 
 	cui.currentInterface = interfaces[Login]
@@ -136,7 +133,7 @@ func (cui *CUI) DrawLoginError(message string) {
 	designer.setDrawing(message).setColor(Red).print()
 	designer.resetColors()
 
-	// TODO: limpar login anterior
+	// TODO: limpar login e erro anterior
 
 	designer.resetColors()
 	designer.
@@ -146,9 +143,70 @@ func (cui *CUI) DrawLoginError(message string) {
 		})
 }
 
-func (cui *CUI) drawConsoleUserInterface() {
-	// TODO: do this after login
-	fmt.Print("start chat interface")
+func (cui *CUI) drawChatInterface() {
+	typingBoxHeight := 10
+	typingBox := make([]string, typingBoxHeight, typingBoxHeight)
+	for lineNumber := range typingBoxHeight {
+		var lineStr string
+		switch lineNumber {
+		case 0:
+			amountOfSpaces := int(cui.consoleWidth) - 10
+			lineStr = fmt.Sprintf(` ┌──type%s┐ `, strings.Repeat(`─`, amountOfSpaces))
+		case 1:
+			amountOfSpaces := int(cui.consoleWidth) - 5
+			lineStr = fmt.Sprintf(` └%s┘ `, strings.Repeat(`─`, amountOfSpaces))
+			lineStr = fmt.Sprintf(` │>%s│ `, strings.Repeat(` `, amountOfSpaces))
+		case typingBoxHeight - 1:
+			amountOfSpaces := int(cui.consoleWidth) - 4
+			lineStr = fmt.Sprintf(` └%s┘ `, strings.Repeat(`─`, amountOfSpaces))
+		default:
+			amountOfSpaces := int(cui.consoleWidth) - 4
+			lineStr = fmt.Sprintf(` │%s│ `, strings.Repeat(` `, amountOfSpaces))
+		}
+
+		typingBox = append(typingBox, lineStr)
+	}
+
+	chatBoxHeight := int(cui.consoleHeight - uint16(typingBoxHeight))
+	chatBox := make([]string, chatBoxHeight, chatBoxHeight)
+	for lineNumber := range chatBoxHeight {
+		var lineStr string
+
+		if lineNumber == 0 {
+			amountOfSpaces := int(cui.consoleWidth) - 10
+			lineStr = fmt.Sprintf(` ┌──CHAT%s┐ `, strings.Repeat(`─`, amountOfSpaces))
+			chatBox[lineNumber] = lineStr
+			continue
+		}
+
+		amountOfSpaces := int(cui.consoleWidth) - 4
+		lineStr = fmt.Sprintf(` │%s│ `, strings.Repeat(` `, amountOfSpaces))
+		chatBox[lineNumber] = lineStr
+	}
+
+	designer := newConsoleDesigner()
+	designer.clearTerminal()
+
+	designer.setColor(White)
+	for currentLine, lineText := range chatBox {
+		designer.setCursorCoordinates(coordinates{x: int16(currentLine + 1), y: 1})
+		designer.setDrawing(lineText).print()
+	}
+	designer.resetColors()
+
+	designer.setColor(Yellow)
+	for currentLine, line := range typingBox {
+		designer.setCursorCoordinates(coordinates{x: int16(currentLine), y: 0})
+		designer.setDrawing(line).print()
+	}
+	designer.resetColors()
+
+	designer.
+		setCursorColor(White).
+		moveCursor(coordinates{
+			x: int16(cui.consoleHeight - 8),
+			y: 5,
+		})
 }
 
 // TODO: testar
