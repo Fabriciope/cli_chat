@@ -19,28 +19,50 @@ func newSender(server *Server) *Sender {
 	return &Sender{server: server}
 }
 
-func (sender *Sender) propagateMessage(ctx context.Context, response shared.Response) {
+func (sender *Sender) propagateMessage(ctx context.Context, response shared.Response) error {
 	conn := ctx.Value("connection").(*net.TCPConn)
 	clients := sender.server.clients
 	wg := new(sync.WaitGroup)
 	wg.Add(len(clients) - 1)
 
-	var send = func(receiver *net.TCPConn, response shared.Response, wg *sync.WaitGroup) {
-		defer wg.Done()
-
-		responseJson, _ := json.Marshal(response)
-		receiver.Write([]byte(responseJson))
-	}
+	sendMsgErr := make(chan error)
 
 	sender.server.lock()
+
 	for addr := range clients {
 		if addr.String() != conn.RemoteAddr().String() {
-			go send(clients[addr].connection, response, wg)
+			go sender.sendMessageWithGoroutine(clients[addr].connection, response, sendMsgErr, wg)
 		}
 	}
 
-	wg.Wait()
+    waitAndCloseChannel := func(wg *sync.WaitGroup, ch chan error) {
+        wg.Wait()
+        close(ch)
+    }
+    go waitAndCloseChannel(wg, sendMsgErr)
+
+    sender.server.unlock()
+
+	for err := range sendMsgErr {
+		if err != nil {
+			close(sendMsgErr)
+			return err
+		}
+    }
+
+	return nil
+}
+
+func (sender *Sender) sendMessageWithGoroutine(receiver *net.TCPConn, response shared.Response, errCh chan<- error, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	responseJson, _ := json.Marshal(response)
+
+	sender.server.lock()
+	_, err := receiver.Write([]byte(responseJson))
 	sender.server.unlock()
+
+	errCh <- err
 }
 
 func (sender *Sender) sendMessage(receiver *net.TCPConn, response shared.Response) (err error) {
