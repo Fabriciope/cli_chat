@@ -46,6 +46,7 @@ func (server *Server) InitServer() {
 func (server *Server) setHandlerForEachRequest(handlers *RequestHandlers) {
 	server.handlersForRequests = handlersMap{
 		shared.LoginActionName: (*handlers).loginHandler,
+   //     shared.SendMessageActionName: (*handlers).sendMessageToEveryone,
 	}
 }
 
@@ -56,10 +57,7 @@ func (server *Server) run() {
 		if err != nil {
 			return
 		}
-
-		type myKey string
-		var key myKey = "connection"
-		context := context.WithValue(context.Background(), key, conn)
+		context := context.WithValue(context.Background(), "connection", conn)
 		go server.clientHandler(context)
 	}
 }
@@ -69,7 +67,7 @@ func (server *Server) clientHandler(ctx context.Context) {
 	log.Printf("new client from %s\n", conn.RemoteAddr().String())
 	defer conn.Close()
 
-	sender := newSender(server)
+	sender := newResponseSender(server)
 	for {
 		var buf [1024]byte
 		bufSize, err := conn.Read(buf[0:])

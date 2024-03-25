@@ -11,13 +11,13 @@ import (
 
 type Service struct {
 	server *Server
-	sender *Sender
+	sender *responseSender
 }
 
 func newService(server *Server) *Service {
 	return &Service{
 		server: server,
-		sender: newSender(server),
+		sender: newResponseSender(server),
 	}
 }
 

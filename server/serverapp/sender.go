@@ -9,17 +9,16 @@ import (
 	"github.com/Fabriciope/cli_chat/shared"
 )
 
-// TODO: renomear struct para responseSender e criar uma interface Sender
 
-type Sender struct {
+type responseSender struct {
 	server *Server
 }
 
-func newSender(server *Server) *Sender {
-	return &Sender{server: server}
+func newResponseSender(server *Server) *responseSender {
+	return &responseSender{server: server}
 }
 
-func (sender *Sender) propagateMessage(ctx context.Context, response shared.Response) error {
+func (sender *responseSender) propagateMessage(ctx context.Context, response shared.Response) error {
 	conn := ctx.Value("connection").(*net.TCPConn)
 	clients := sender.server.clients
 	wg := new(sync.WaitGroup)
@@ -53,7 +52,7 @@ func (sender *Sender) propagateMessage(ctx context.Context, response shared.Resp
 	return nil
 }
 
-func (sender *Sender) sendMessageWithGoroutine(receiver *net.TCPConn, response shared.Response, errCh chan<- error, wg *sync.WaitGroup) {
+func (sender *responseSender) sendMessageWithGoroutine(receiver *net.TCPConn, response shared.Response, errCh chan<- error, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	responseJson, _ := json.Marshal(response)
@@ -65,7 +64,7 @@ func (sender *Sender) sendMessageWithGoroutine(receiver *net.TCPConn, response s
 	errCh <- err
 }
 
-func (sender *Sender) sendMessage(receiver *net.TCPConn, response shared.Response) (err error) {
+func (sender *responseSender) sendMessage(receiver *net.TCPConn, response shared.Response) (err error) {
 	responseJson, _ := json.Marshal(response)
 
 	sender.server.lock()
