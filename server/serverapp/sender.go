@@ -29,7 +29,7 @@ func (sender *responseSender) propagateMessage(ctx context.Context, response sha
 	sender.server.lock()
 
 	for addr := range clients {
-		if addr.String() != conn.RemoteAddr().String() {
+		if addr != conn.RemoteAddr().String() {
 			go sender.sendMessageWithGoroutine(clients[addr].connection, response, sendMsgErr, wg)
 		}
 	}

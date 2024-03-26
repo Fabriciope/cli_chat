@@ -2,9 +2,7 @@ package serverapp
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"net"
 
 	"github.com/Fabriciope/cli_chat/shared"
 )
@@ -21,33 +19,8 @@ func newService(server *Server) *Service {
 	}
 }
 
-func (service *Service) hasClient(username string) bool {
-	for i := range service.server.clients {
-		if service.server.clients[i].username == username {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (service *Service) addClient(ctx context.Context, username string) error {
-	if service.hasClient(username) {
-		return errors.New("user already exists")
-	}
-
-	conn := ctx.Value("connection").(*net.TCPConn)
-	client := newClient(conn, username)
-
-	service.server.lock()
-	service.server.clients[conn.RemoteAddr()] = client
-	service.server.unlock()
-
-	return nil
-}
-
 func (service *Service) login(ctx context.Context, username string) (bool, string) {
-	if err := service.addClient(ctx, username); err != nil {
+	if err := service.server.addClient(ctx, username); err != nil {
 		return false, err.Error()
 	}
 
@@ -59,3 +32,4 @@ func (service *Service) login(ctx context.Context, username string) (bool, strin
 
 	return true, fmt.Sprintf("User %s logged", username)
 }
+

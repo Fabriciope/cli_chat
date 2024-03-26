@@ -3,6 +3,7 @@ package serverapp
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net"
 	"sync"
@@ -19,7 +20,7 @@ type Server struct {
 	mutex               *sync.Mutex
 	listener            *net.TCPListener
 	handlersForRequests handlersMap
-	clients             map[net.Addr]*Client
+	clients             map[string]*Client
 }
 
 func NewServer() (*Server, error) {
@@ -33,7 +34,7 @@ func NewServer() (*Server, error) {
 		mutex:               &sync.Mutex{},
 		listener:            listener,
 		handlersForRequests: make(handlersMap),
-		clients:             make(map[net.Addr]*Client),
+		clients:             make(map[string]*Client),
 	}, nil
 }
 
@@ -45,8 +46,8 @@ func (server *Server) InitServer() {
 
 func (server *Server) setHandlerForEachRequest(handlers *RequestHandlers) {
 	server.handlersForRequests = handlersMap{
-		shared.LoginActionName: (*handlers).loginHandler,
-   //     shared.SendMessageActionName: (*handlers).sendMessageToEveryone,
+		shared.LoginActionName:       (*handlers).loginHandler,
+		shared.SendMessageActionName: (*handlers).sendMessageInChat,
 	}
 }
 
@@ -111,4 +112,38 @@ func (server *Server) lock() {
 
 func (server *Server) unlock() {
 	server.mutex.Unlock()
+}
+
+func (server *Server) addClient(ctx context.Context, username string) error {
+    if server.hasClient(username) {
+        return errors.New("user already exists")
+    }
+
+    conn := ctx.Value("connection").(*net.TCPConn)
+    client := newClient(conn, username)
+
+    server.lock()
+    server.clients[conn.RemoteAddr().String()] = client
+    server.unlock()
+
+    return nil
+}
+
+func (server *Server) hasClient(username string) bool {
+	for i := range server.clients {
+		if server.clients[i].username == username {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (server *Server) userByRemoteAddr(remoteAddr string) (*Client, error) {
+    client, ok := server.clients[remoteAddr]
+    if !ok {
+        return nil, errors.New("client does not exist")
+    }
+
+    return client, nil
 }
