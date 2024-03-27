@@ -38,7 +38,10 @@ func (controller *controller) setHandlerForEachCommand() {
 }
 
 func (controller *controller) setHandlerForEachResponse() {
-	controller.responsesHandlers = responsesHandlersMap{}
+    // TODO: refatorar código para colocar o login response aqui
+	controller.responsesHandlers = responsesHandlersMap{
+        shared.NewClientNotificationName: controller.handler.newClientResponseHandler,
+    }
 }
 
 func (controller *controller) commandHandler(actionName string) (commandHandler, bool) {
