@@ -57,6 +57,7 @@ func (designer *consoleDesigner) setDrawing(drawing string) *consoleDesigner {
 	return designer
 }
 
+// TODO: depois de prinntar o desenho no console resetar as cores
 func (designer *consoleDesigner) print() error {
 	if designer.drawing == "" {
 		return errors.New("make a drawing first")
@@ -75,6 +76,36 @@ func (designer *consoleDesigner) print() error {
 
 	fmt.Print(designer.drawingColor, designer.drawing)
 	return nil
+}
+
+func (designer *consoleDesigner) printAndResetColors() error {
+	return nil
+}
+
+func (designer *consoleDesigner) toString() string {
+	return ""
+}
+
+func (designer *consoleDesigner) toStringWithResetColors() string {
+	var moveCursorCode string
+
+	x := designer.cursorCoordinates.x
+	y := designer.cursorCoordinates.y
+	if x != 0 && y != 0 {
+		replaces := map[string]int16{
+			"lines":   x,
+			"columns": y,
+		}
+		moveCursorCode, _ = replaceInEscapeCode(moveCursor, replaces)
+	}
+
+	return fmt.Sprintf(
+		"%s%s%s%s",
+		designer.drawingColor,
+		designer.drawing,
+		moveCursorCode,
+		reset,
+	)
 }
 
 func (designer *consoleDesigner) clearTerminal() {
