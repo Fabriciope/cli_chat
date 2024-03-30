@@ -2,7 +2,9 @@ package serverapp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net"
 
 	"github.com/Fabriciope/cli_chat/shared"
 )
@@ -33,3 +35,25 @@ func (service *Service) login(ctx context.Context, username string) (bool, strin
 	return true, fmt.Sprintf("User %s logged", username)
 }
 
+func (service *Service) sendMessageToEveryone(ctx context.Context, message string) error {
+	conn := ctx.Value("connection").(*net.TCPConn)
+
+	client, err := service.server.userByRemoteAddr(conn.RemoteAddr().String())
+	if err != nil {
+		return err
+	}
+
+	textMessage, err := json.Marshal(shared.TextMessage{
+		Username: client.username,
+		Message:  message,
+	})
+	if err != nil {
+		return err
+	}
+
+	return service.sender.propagateMessage(ctx, shared.Response{
+		Name:    shared.NewMessageNotificationName,
+		Err:     false,
+		Payload: string(textMessage),
+	})
+}

@@ -23,6 +23,7 @@ func newRequestHandlers(server *Server) *RequestHandlers {
 }
 
 func (rh *RequestHandlers) loginHandler(ctx context.Context, request shared.Request) *shared.Response {
+	// TODO: trocar a lógica de retorno do servico
 	username := strings.Trim(request.Payload, " ")
 	loggedIn, payload := rh.service.login(ctx, username)
 	if loggedIn {
@@ -35,5 +36,23 @@ func (rh *RequestHandlers) loginHandler(ctx context.Context, request shared.Requ
 		Name:    request.Name,
 		Err:     !loggedIn,
 		Payload: payload,
+	}
+}
+
+func (rh *RequestHandlers) sendMessageInChat(ctx context.Context, request shared.Request) *shared.Response {
+	message := strings.Trim(request.Payload, " ")
+	err := rh.service.sendMessageToEveryone(ctx, message)
+	if err != nil {
+		return &shared.Response{
+			Name:    request.Name,
+			Err:     true,
+			Payload: err.Error(),
+		}
+	}
+
+	return &shared.Response{
+		Name:    request.Name,
+		Err:     false,
+		Payload: "message sent successfully",
 	}
 }

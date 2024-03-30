@@ -12,6 +12,7 @@ type commandsHandlersMap map[string]commandHandler
 type responseHandler func(shared.Response)
 type responsesHandlersMap map[string]responseHandler
 
+// TODO: pensar em criar um package controller e passar este arquivo e os handlers para la
 type controller struct {
 	commandsHandlers  commandsHandlersMap
 	responsesHandlers responsesHandlersMap
@@ -38,10 +39,12 @@ func (controller *controller) setHandlerForEachCommand() {
 }
 
 func (controller *controller) setHandlerForEachResponse() {
-    // TODO: refatorar código para colocar o login response aqui
+	// TODO: refatorar código para colocar o login response aqui
 	controller.responsesHandlers = responsesHandlersMap{
-        shared.NewClientNotificationName: controller.handler.newClientResponseHandler,
-    }
+		shared.NewClientNotificationName:  controller.handler.newClientResponseHandler,
+		shared.NewMessageNotificationName: controller.handler.newMessageReceivedHandler,
+        shared.SendMessageActionName: controller.handler.sendMessageInChatResponse,
+	}
 }
 
 func (controller *controller) commandHandler(actionName string) (commandHandler, bool) {
@@ -59,30 +62,33 @@ func (controller *controller) loginHandler() func(string) error {
 }
 
 func (controller *controller) handleInput(input string) {
+	// TODO: serealizar input
 	if strings.HasPrefix(input, ":") {
 		controller.findHandlerAndRun(input)
 		return
 	}
 
+	// TODO: tratar erro retornado
 	controller.handler.sendMessageInChat(input)
 }
 
 func (controller *controller) findHandlerAndRun(command string) {
 	handler, exists := controller.commandHandler(command)
 	if !exists {
-        // TODO: this command does not exists
+		// TODO: this command does not exists - exibir em chat line
 	}
 
 	handler()
 }
 
 func (controller *controller) handleResponse(response shared.Response) {
-		if response.Err && response.Name == "unknown" {
-			// TODO: jogar todos os logs para um arquivo e tratar o erro de outra maneira
-			log.Fatalf("error name: %s - msg: %s", response.Name, response.Payload)
-			return
-		}
+	if response.Err && response.Name == "unknown" {
+		// TODO: jogar todos os logs para um arquivo e tratar o erro de outra maneira
+		log.Fatalf("error name: %s - msg: %s", response.Name, response.Payload)
+		return
+	}
 
-		handler, _ := controller.responseHandler(response.Name)
-		handler(response)
+	// TODO: tratar erro
+	handler, _ := controller.responseHandler(response.Name)
+	handler(response)
 }

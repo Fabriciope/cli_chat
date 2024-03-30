@@ -101,12 +101,12 @@ func (client *Client) listenToServer(controller *controller) {
 }
 
 func (client *Client) listenToInput(controller *controller) {
-	for {
-		if !client.inputScanner.Scan() || client.inputScanner.Err() == nil {
+	for client.inputScanner.Scan() {
+		if client.inputScanner.Err() != nil {
 			return
 		}
-
 		controller.handleInput(client.inputScanner.Text())
+        //TODO: color o cursor no lugar de digitar a cada interacao
 	}
 }
 
