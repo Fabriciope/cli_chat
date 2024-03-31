@@ -31,16 +31,16 @@ const (
 )
 
 type CUI struct {
-	consoleHeight    uint16
-	consoleWidth     uint16
-	chatBoxHeight    uint16
-	typingBoxHeight  uint16
+	consoleHeight     uint16
+	consoleWidth      uint16
+	chatBoxHeight     uint16
+	typingBoxHeight   uint16
 	xCoordinateToType int16
-	sizeListener     *tsize.SizeListener
+	sizeListener      *tsize.SizeListener
 
 	currentInterface string
 	logged           chan bool
-	chatLines     []*ChatLine
+	chatLines        []*ChatLine
 }
 
 func NewCUI() (*CUI, error) {
@@ -56,14 +56,14 @@ func NewCUI() (*CUI, error) {
 
 	typingBoxHeight := uint16(10)
 	var cui = &CUI{
-		consoleHeight:    uint16(size.Height),
-		consoleWidth:     uint16(size.Width),
-		chatBoxHeight:    uint16(size.Height) - typingBoxHeight,
-		xCoordinateToType: int16(uint16(size.Height) - 8),
-		typingBoxHeight:  typingBoxHeight,
-		sizeListener:     listener,
-		logged:           make(chan bool),
-		chatLines:     make([]*ChatLine, 0),
+		consoleHeight:     uint16(size.Height),
+		consoleWidth:      uint16(size.Width),
+		chatBoxHeight:     uint16(size.Height) - typingBoxHeight,
+		xCoordinateToType: int16(uint16(size.Height) - 9),
+		typingBoxHeight:   typingBoxHeight,
+		sizeListener:      listener,
+		logged:            make(chan bool),
+		chatLines:         make([]*ChatLine, 0),
 	}
 
 	return cui, nil
@@ -91,11 +91,11 @@ func (cui *CUI) listenToConsoleSize() {
 }
 
 func (cui *CUI) updateMeasures(newSize tsize.Size) {
-    consoleHeight := uint16(newSize.Height)
+	consoleHeight := uint16(newSize.Height)
 	cui.consoleWidth = uint16(newSize.Width)
 	cui.consoleHeight = consoleHeight
 	cui.chatBoxHeight = consoleHeight - cui.typingBoxHeight
-    cui.xCoordinateToType = int16(consoleHeight - 8)
+	cui.xCoordinateToType = int16(consoleHeight - 9)
 }
 
 func (cui *CUI) adaptNewConsoleSize() {
@@ -104,7 +104,7 @@ func (cui *CUI) adaptNewConsoleSize() {
 		cui.drawLoginInterface()
 	case "chat":
 		cui.drawChatInterface()
-        cui.adaptChatLinesOnTerminal()
+		cui.adaptChatLinesOnTerminal()
 	}
 }
 
@@ -135,7 +135,7 @@ func (cui *CUI) DrawLoginError(message string) {
 	var startOfCliChatText int16 = int16(cui.consoleWidth/2) - int16(cliChatTextWidth/2)
 	designer.moveCursor(coordinates{x: 12, y: startOfCliChatText + 15})
 	designer.setDrawing(message).setColor(Red).print()
-    designer.resetColors()
+	designer.resetColors()
 
 	// TODO: limpar login e erro anterior
 	startOfLoginBox := startOfCliChatText + 13
@@ -148,7 +148,64 @@ func (cui *CUI) DrawLoginError(message string) {
 
 // TODO: exibir os comandos disponiveis
 func (cui *CUI) drawChatInterface() {
-	typingBox := make([]string, cui.typingBoxHeight, cui.typingBoxHeight)
+	designer := newConsoleDesigner()
+	designer.clearTerminal()
+    defer cui.moveCursorToTypeInChat(designer)
+
+	designer.setColor(White)
+	chatBox := cui.chatBoxToSlice()
+	for currentLine, lineText := range chatBox {
+		designer.setCursorCoordinates(coordinates{x: int16(currentLine + 1), y: 1})
+		designer.setDrawing(lineText).print()
+	}
+	designer.resetColors()
+
+	designer.setColor(Yellow)
+	typingBox := cui.typingBoxToSlice()
+    startOfDrawing := cui.consoleHeight - cui.typingBoxHeight
+	for currentLine, lineText := range typingBox {
+        currentLine += int(startOfDrawing)
+		designer.setCursorCoordinates(coordinates{x: int16(currentLine), y: 1})
+		designer.setDrawing(lineText).print()
+	}
+}
+ 
+func (cui *CUI) RedrawTypingBox() {
+    designer := newConsoleDesigner()
+    defer cui.moveCursorToTypeInChat(designer)
+
+	designer.setColor(Yellow)
+	typingBox := cui.typingBoxToSlice()
+    startOfDrawing := cui.consoleHeight - cui.typingBoxHeight
+	for currentLine, line := range typingBox {
+        currentLine += int(startOfDrawing)
+		designer.setCursorCoordinates(coordinates{x: int16(currentLine), y: 1})
+		designer.setDrawing(line).print()
+	}
+}
+
+func (cui *CUI) chatBoxToSlice() (chatBox []string) {
+	chatBox = make([]string, cui.chatBoxHeight, cui.chatBoxHeight)
+	for lineNumber := range cui.chatBoxHeight {
+		var lineStr string
+
+		if lineNumber == 0 {
+			amountOfSpaces := int(cui.consoleWidth) - 10
+            lineStr = fmt.Sprintf(` ┌──CHAT%s┐ `, strings.Repeat(`─`, amountOfSpaces))
+			chatBox[lineNumber] = lineStr
+			continue
+		}
+
+		amountOfSpaces := int(cui.consoleWidth) - 4
+		lineStr = fmt.Sprintf(` │%s│ `, strings.Repeat(` `, amountOfSpaces))
+		chatBox[lineNumber] = lineStr
+	}
+
+	return
+}
+
+func (cui *CUI) typingBoxToSlice() (typingBox []string) {
+	typingBox = make([]string, cui.typingBoxHeight, cui.typingBoxHeight)
 	for lineNumber := range cui.typingBoxHeight {
 		var lineStr string
 		switch lineNumber {
@@ -166,50 +223,10 @@ func (cui *CUI) drawChatInterface() {
 			lineStr = fmt.Sprintf(` │%s│ `, strings.Repeat(` `, amountOfSpaces))
 		}
 
-		typingBox = append(typingBox, lineStr)
+        typingBox[lineNumber] = lineStr
 	}
 
-	chatBox := make([]string, cui.chatBoxHeight, cui.chatBoxHeight)
-	for lineNumber := range cui.chatBoxHeight {
-		var lineStr string
-
-		if lineNumber == 0 {
-			amountOfSpaces := int(cui.consoleWidth) - 10
-			lineStr = fmt.Sprintf(` ┌──CHAT%s┐ `, strings.Repeat(`─`, amountOfSpaces))
-			chatBox[lineNumber] = lineStr
-			continue
-		}
-
-		amountOfSpaces := int(cui.consoleWidth) - 4
-		lineStr = fmt.Sprintf(` │%s│ `, strings.Repeat(` `, amountOfSpaces))
-		chatBox[lineNumber] = lineStr
-	}
-
-	designer := newConsoleDesigner()
-	designer.clearTerminal()
-	defer func() {
-        designer.resetColors()
-		designer.
-			setCursorColor(White).
-			moveCursor(coordinates{
-				x: cui.xCoordinateToType,
-				y: 5,
-			})
-	}()
-
-	designer.setColor(White)
-	for currentLine, lineText := range chatBox {
-		designer.setCursorCoordinates(coordinates{x: int16(currentLine + 1), y: 1})
-		designer.setDrawing(lineText).print()
-	}
-	designer.resetColors()
-
-	designer.setColor(Yellow)
-	for currentLine, line := range typingBox {
-		designer.setCursorCoordinates(coordinates{x: int16(currentLine), y: 0})
-		designer.setDrawing(line).print()
-	}
-
+	return
 }
 
 func (cui *CUI) DrawNewLineInChat(line *ChatLine) {
@@ -219,7 +236,7 @@ func (cui *CUI) DrawNewLineInChat(line *ChatLine) {
 
 func (cui *CUI) addChatLine(line *ChatLine) {
 	cui.chatLines = append(cui.chatLines, line)
-    cui.checkIfChatLinesExceededTheLimit()
+	cui.checkIfChatLinesExceededTheLimit()
 }
 
 func (cui *CUI) checkIfChatLinesExceededTheLimit() {
@@ -232,15 +249,7 @@ func (cui *CUI) checkIfChatLinesExceededTheLimit() {
 
 func (cui *CUI) drawChatLines() {
 	designer := newConsoleDesigner()
-	defer func() {
-		designer.resetColors()
-		designer.
-			setCursorColor(White).
-			moveCursor(coordinates{
-				x: cui.xCoordinateToType,
-				y: 5,
-			})
-	}()
+    defer cui.moveCursorToTypeInChat(designer)
 
 	for key, chatLine := range cui.chatLines {
 		designer.setCursorCoordinates(coordinates{x: int16(key + 2), y: 3})
@@ -254,9 +263,19 @@ func (cui *CUI) drawChatLines() {
 	}
 }
 
+func (cui *CUI) moveCursorToTypeInChat(designer *consoleDesigner) {
+    designer.resetColors()
+	designer.
+		setCursorColor(White).
+		moveCursor(coordinates{
+			x: cui.xCoordinateToType,
+			y: 5,
+		})
+}
+
 func (cui *CUI) adaptChatLinesOnTerminal() {
-    cui.checkIfChatLinesExceededTheLimit()
-    cui.drawChatLines()
+	cui.checkIfChatLinesExceededTheLimit()
+	cui.drawChatLines()
 }
 
 func (cui *CUI) drawLoading(length uint, color escapeCode) error {

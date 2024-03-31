@@ -105,8 +105,15 @@ func (client *Client) listenToInput(controller *controller) {
 		if client.inputScanner.Err() != nil {
 			return
 		}
+
+		input := strings.Trim(client.inputScanner.Text(), " ")
+		if input == "" {
+			client.cui.RedrawTypingBox()
+			continue
+		}
+
 		controller.handleInput(client.inputScanner.Text())
-        //TODO: color o cursor no lugar de digitar a cada interacao
+		client.cui.RedrawTypingBox()
 	}
 }
 
