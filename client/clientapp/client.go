@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Fabriciope/cli_chat/client/clientapp/controller"
 	"github.com/Fabriciope/cli_chat/client/clientapp/cui"
 	"github.com/Fabriciope/cli_chat/shared"
 )
@@ -21,7 +22,7 @@ const (
 	localPort = 3000
 )
 
-type Client struct {
+type MyUser struct {
 	connection   *net.TCPConn
 	inputScanner *bufio.Scanner
 
@@ -30,7 +31,7 @@ type Client struct {
 	loggedIn bool
 }
 
-func NewClient() (*Client, error) {
+func NewUser() (*MyUser, error) {
 	remoteAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", remoteIp, remotePort))
 	//localAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", localIp, localPort))
 	conn, err := net.DialTCP("tcp", nil, remoteAddr)
@@ -43,7 +44,7 @@ func NewClient() (*Client, error) {
 		return nil, err
 	}
 
-	return &Client{
+	return &MyUser{
 		connection:   conn,
 		inputScanner: bufio.NewScanner(os.Stdin),
 		cui:          cui,
@@ -52,30 +53,30 @@ func NewClient() (*Client, error) {
 }
 
 // TODO: retornar error para tratar no main
-func (client *Client) InitChat() {
-	defer client.connection.Close()
+func (user *MyUser) InitChat() {
+	defer user.connection.Close()
 
-	go client.cui.InitApp()
+	go user.CUI().InitApp()
 
-	controller := newController(client)
+	controller := controller.NewController(user)
 
-	client.login(controller.loginHandler())
+	user.login(controller.LoginHandler())
 
-	go client.listenToServer(controller)
-	client.listenToInput(controller)
+	go user.listenToServer(controller)
+	user.listenToInput(controller)
 }
 
-func (client *Client) login(handler func(string) error) {
+func (client *MyUser) login(handler func(string) error) {
 	for client.inputScanner.Scan() {
 		username := strings.Trim(client.inputScanner.Text(), " ")
 		if username == "" {
-			client.cui.DrawLoginError("invalid username!")
-			continue
+			client.CUI().DrawLoginError("invalid username!")
+			client.CUI().DrawLoginError("invalid username!")
 		}
 
 		err := handler(username)
 		if err != nil {
-			client.cui.DrawLoginError(err.Error() + ", try again.")
+			client.CUI().DrawLoginError(err.Error() + ", try again.")
 			continue
 		}
 
@@ -83,7 +84,7 @@ func (client *Client) login(handler func(string) error) {
 	}
 }
 
-func (client *Client) listenToServer(controller *controller) {
+func (client *MyUser) listenToServer(controller *controller.Controller) {
 	for {
 		var buf = make([]byte, 1024)
 		n, err := client.connection.Read(buf)
@@ -96,11 +97,11 @@ func (client *Client) listenToServer(controller *controller) {
 			return
 		}
 
-		controller.handleResponse(responseFromServer)
+		controller.HandleResponse(responseFromServer)
 	}
 }
 
-func (client *Client) listenToInput(controller *controller) {
+func (client *MyUser) listenToInput(controller *controller.Controller) {
 	for client.inputScanner.Scan() {
 		if client.inputScanner.Err() != nil {
 			return
@@ -108,16 +109,16 @@ func (client *Client) listenToInput(controller *controller) {
 
 		input := strings.Trim(client.inputScanner.Text(), " ")
 		if input == "" {
-			client.cui.RedrawTypingBox()
+			client.CUI().RedrawTypingBox()
 			continue
 		}
 
-		controller.handleInput(client.inputScanner.Text())
-		client.cui.RedrawTypingBox()
+		controller.HandleInput(client.inputScanner.Text())
+		client.CUI().RedrawTypingBox()
 	}
 }
 
-func (client *Client) awaitResponseFromServer() (responseFromServer shared.Response, err error) {
+func (client *MyUser) AwaitResponseFromServer() (responseFromServer shared.Response, err error) {
 	var buf = make([]byte, 1024)
 	n, err := client.connection.Read(buf)
 	if err != nil {
@@ -129,4 +130,20 @@ func (client *Client) awaitResponseFromServer() (responseFromServer shared.Respo
 	}
 
 	return
+}
+
+func (client *MyUser) Conn() *net.TCPConn {
+	return client.connection
+}
+
+func (user *MyUser) CUI() *cui.CUI {
+	return user.cui
+}
+
+func (user *MyUser) LoggedIn() bool {
+	return user.loggedIn
+}
+
+func (user *MyUser) SetLoggedInAs(logged bool) {
+	user.loggedIn = logged
 }

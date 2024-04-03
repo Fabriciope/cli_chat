@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	client, err := clientapp.NewClient()
+	client, err := clientapp.NewUser()
 	if err != nil {
 		log.Panicln(err)
 		return
