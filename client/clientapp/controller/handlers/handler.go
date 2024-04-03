@@ -19,15 +19,13 @@ func NewHandler(user interfaces.Client) *Handler {
 }
 
 func (handler *Handler) CommandHandler(handlerName string) interfaces.CommandHandler {
-    return nil
+	return nil
 }
 
 func (handler *Handler) ResponseHandler(string) interfaces.ResponseHandler {
-    return nil
+	return nil
 }
 
 func (handler *Handler) CUI() *cui.CUI {
 	return handler.user.CUI()
 }
-
-// TODO: criar funcao para definir os handlers

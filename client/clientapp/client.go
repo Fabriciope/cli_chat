@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/Fabriciope/cli_chat/client/clientapp/controller"
+	"github.com/Fabriciope/cli_chat/client/clientapp/controller/handlers"
 	"github.com/Fabriciope/cli_chat/client/clientapp/cui"
 	"github.com/Fabriciope/cli_chat/shared"
 )
@@ -25,9 +26,8 @@ const (
 type MyUser struct {
 	connection   *net.TCPConn
 	inputScanner *bufio.Scanner
-
+    controller *controller.Controller
 	cui *cui.CUI
-
 	loggedIn bool
 }
 
@@ -44,39 +44,40 @@ func NewUser() (*MyUser, error) {
 		return nil, err
 	}
 
-	return &MyUser{
+
+    myUser := &MyUser{
 		connection:   conn,
 		inputScanner: bufio.NewScanner(os.Stdin),
 		cui:          cui,
 		loggedIn:     false,
-	}, nil
+	}
+    myUser.controller = controller.NewController(handlers.NewHandler(myUser))
+
+    return myUser, nil
 }
 
-// TODO: retornar error para tratar no main
 func (user *MyUser) InitChat() {
 	defer user.connection.Close()
 
 	go user.CUI().InitApp()
 
-	controller := controller.NewController(user)
+	user.login()
 
-	user.login(controller.LoginHandler())
-
-	go user.listenToServer(controller)
-	user.listenToInput(controller)
+	go user.listenToServer()
+	user.listenToInput()
 }
 
-func (client *MyUser) login(handler func(string) error) {
-	for client.inputScanner.Scan() {
-		username := strings.Trim(client.inputScanner.Text(), " ")
+func (user *MyUser) login() {
+	for user.inputScanner.Scan() {
+		username := strings.Trim(user.inputScanner.Text(), " ")
 		if username == "" {
-			client.CUI().DrawLoginError("invalid username!")
-			client.CUI().DrawLoginError("invalid username!")
+			user.CUI().DrawLoginError("invalid username!")
+			user.CUI().DrawLoginError("invalid username!")
 		}
 
-		err := handler(username)
+        err := user.controller.LoginHandler()(username)
 		if err != nil {
-			client.CUI().DrawLoginError(err.Error() + ", try again.")
+			user.CUI().DrawLoginError(err.Error() + ", try again.")
 			continue
 		}
 
@@ -84,10 +85,10 @@ func (client *MyUser) login(handler func(string) error) {
 	}
 }
 
-func (client *MyUser) listenToServer(controller *controller.Controller) {
+func (user *MyUser) listenToServer() {
 	for {
 		var buf = make([]byte, 1024)
-		n, err := client.connection.Read(buf)
+		n, err := user.connection.Read(buf)
 		if err != nil {
 			return
 		}
@@ -97,30 +98,30 @@ func (client *MyUser) listenToServer(controller *controller.Controller) {
 			return
 		}
 
-		controller.HandleResponse(responseFromServer)
+		user.controller.HandleResponse(responseFromServer)
 	}
 }
 
-func (client *MyUser) listenToInput(controller *controller.Controller) {
-	for client.inputScanner.Scan() {
-		if client.inputScanner.Err() != nil {
+func (user *MyUser) listenToInput() {
+	for user.inputScanner.Scan() {
+		if user.inputScanner.Err() != nil {
 			return
 		}
 
-		input := strings.Trim(client.inputScanner.Text(), " ")
+		input := strings.Trim(user.inputScanner.Text(), " ")
 		if input == "" {
-			client.CUI().RedrawTypingBox()
+			user.CUI().RedrawTypingBox()
 			continue
 		}
 
-		controller.HandleInput(client.inputScanner.Text())
-		client.CUI().RedrawTypingBox()
+		user.controller.HandleInput(user.inputScanner.Text())
+		user.CUI().RedrawTypingBox()
 	}
 }
 
-func (client *MyUser) AwaitResponseFromServer() (responseFromServer shared.Response, err error) {
+func (user *MyUser) AwaitResponseFromServer() (responseFromServer shared.Response, err error) {
 	var buf = make([]byte, 1024)
-	n, err := client.connection.Read(buf)
+	n, err := user.connection.Read(buf)
 	if err != nil {
 		return
 	}
@@ -132,8 +133,8 @@ func (client *MyUser) AwaitResponseFromServer() (responseFromServer shared.Respo
 	return
 }
 
-func (client *MyUser) Conn() *net.TCPConn {
-	return client.connection
+func (user *MyUser) Conn() *net.TCPConn {
+	return user.connection
 }
 
 func (user *MyUser) CUI() *cui.CUI {

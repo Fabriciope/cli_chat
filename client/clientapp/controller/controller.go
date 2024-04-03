@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/Fabriciope/cli_chat/client/clientapp/controller/handlers"
-	"github.com/Fabriciope/cli_chat/client/clientapp/interfaces"
 	"github.com/Fabriciope/cli_chat/shared"
 )
 
@@ -14,18 +13,17 @@ type commandsHandlersMap map[string]commandHandler
 type responseHandler func(shared.Response)
 type responsesHandlersMap map[string]responseHandler
 
-// TODO: pensar em criar um package controller e passar este arquivo e os handlers para la
 type Controller struct {
 	commandsHandlers  commandsHandlersMap
 	responsesHandlers responsesHandlersMap
 	handler           *handlers.Handler
 }
 
-func NewController(user interfaces.Client) *Controller {
+func NewController(handler *handlers.Handler) *Controller {
 	controller := &Controller{
 		commandsHandlers:  make(commandsHandlersMap),
 		responsesHandlers: make(responsesHandlersMap),
-		handler:          handlers.NewHandler(user),
+		handler:           handler,
 	}
 
 	controller.setHandlerForEachCommand()
@@ -41,11 +39,10 @@ func (controller *Controller) setHandlerForEachCommand() {
 }
 
 func (controller *Controller) setHandlerForEachResponse() {
-	// TODO: refatorar código para colocar o login response aqui
 	controller.responsesHandlers = responsesHandlersMap{
 		shared.NewClientNotificationName:  controller.handler.NewClientResponseHandler,
 		shared.NewMessageNotificationName: controller.handler.NewMessageReceivedHandler,
-        shared.SendMessageActionName: controller.handler.SendMessageInChatResponse,
+		shared.SendMessageActionName:      controller.handler.SendMessageInChatResponse,
 	}
 }
 
@@ -59,7 +56,6 @@ func (controller *Controller) responseHandler(actionName string) (responseHandle
 	return handler, exists
 }
 
-// TODO: tirar este metodo e trocar a logica de login
 func (controller *Controller) LoginHandler() func(string) error {
 	return controller.handler.LoginHandler
 }
