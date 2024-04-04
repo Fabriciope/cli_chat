@@ -22,6 +22,7 @@ type Response struct {
 }
 
 type TextMessage struct {
-	Username string `json:"username"`
-	Message  string `json:"message"`
+	Username  string    `json:"username"`
+	UserColor ColorCode `json:"user_color"`
+	Message   string    `json:"message"`
 }

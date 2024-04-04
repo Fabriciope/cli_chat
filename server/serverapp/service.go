@@ -44,8 +44,9 @@ func (service *Service) sendMessageToEveryone(ctx context.Context, message strin
 	}
 
 	textMessage, err := json.Marshal(shared.TextMessage{
-		Username: client.username,
-		Message:  message,
+		Username:  client.username,
+		UserColor: client.color,
+		Message:   message,
 	})
 	if err != nil {
 		return err

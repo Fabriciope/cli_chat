@@ -115,18 +115,27 @@ func (server *Server) unlock() {
 }
 
 func (server *Server) addClient(ctx context.Context, username string) error {
-    if server.hasClient(username) {
-        return errors.New("user already exists")
+	if server.hasClient(username) {
+		return errors.New("user already exists")
+	}
+
+	conn := ctx.Value("connection").(*net.TCPConn)
+
+    var chosenColor shared.ColorCode
+    loop:
+    for _, color := range availableColors {
+        if !server.colorIsAlreadyInUser(color) {
+            chosenColor = color
+            break loop
+        }
     }
+	client := newClient(conn, username, chosenColor)
 
-    conn := ctx.Value("connection").(*net.TCPConn)
-    client := newClient(conn, username)
+	server.lock()
+	server.clients[conn.RemoteAddr().String()] = client
+	server.unlock()
 
-    server.lock()
-    server.clients[conn.RemoteAddr().String()] = client
-    server.unlock()
-
-    return nil
+	return nil
 }
 
 func (server *Server) hasClient(username string) bool {
@@ -139,11 +148,21 @@ func (server *Server) hasClient(username string) bool {
 	return false
 }
 
-func (server *Server) userByRemoteAddr(remoteAddr string) (*Client, error) {
-    client, ok := server.clients[remoteAddr]
-    if !ok {
-        return nil, errors.New("client does not exist")
+func (server *Server) colorIsAlreadyInUser(color shared.ColorCode) bool {
+    for i := range server.clients {
+        if server.clients[i].color == color {
+            return true
+        }
     }
 
-    return client, nil
+    return false
+}
+
+func (server *Server) userByRemoteAddr(remoteAddr string) (*Client, error) {
+	client, ok := server.clients[remoteAddr]
+	if !ok {
+		return nil, errors.New("client does not exist")
+	}
+
+	return client, nil
 }

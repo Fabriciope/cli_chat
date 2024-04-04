@@ -17,6 +17,7 @@ func newResponseSender(server *Server) *responseSender {
 	return &responseSender{server: server}
 }
 
+// TODO:   verificar se a conexao esta aberta antes de escrever
 func (sender *responseSender) propagateMessage(ctx context.Context, response shared.Response) error {
 	conn := ctx.Value("connection").(*net.TCPConn)
 	responseJson, _ := json.Marshal(response)

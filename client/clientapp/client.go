@@ -56,6 +56,7 @@ func NewUser() (*MyUser, error) {
     return myUser, nil
 }
 
+// TODO: fazer algo quando a conexao com o servidor e perdida
 func (user *MyUser) InitChat() {
 	defer user.connection.Close()
 
@@ -72,7 +73,7 @@ func (user *MyUser) login() {
 		username := strings.Trim(user.inputScanner.Text(), " ")
 		if username == "" {
 			user.CUI().DrawLoginError("invalid username!")
-			user.CUI().DrawLoginError("invalid username!")
+            continue
 		}
 
         err := user.controller.LoginHandler()(username)
