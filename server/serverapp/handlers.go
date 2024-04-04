@@ -2,6 +2,7 @@ package serverapp
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 
@@ -23,19 +24,23 @@ func newRequestHandlers(server *Server) *RequestHandlers {
 }
 
 func (rh *RequestHandlers) loginHandler(ctx context.Context, request shared.Request) *shared.Response {
-	// TODO: trocar a lógica de retorno do servico
 	username := strings.Trim(request.Payload, " ")
-	loggedIn, payload := rh.service.login(ctx, username)
-	if loggedIn {
-		log.Printf("client %s logged\n\n", username)
-	} else {
-		log.Printf("cannot log in %s: %s\n\n", username, payload)
+	err := rh.service.login(ctx, username)
+	if err != nil {
+		errStr := err.Error()
+		log.Printf("cannot log in %s: %s\n\n", username, errStr)
+		return &shared.Response{
+			Name:    request.Name,
+			Err:     true,
+			Payload: errStr,
+		}
 	}
 
+	log.Printf("client %s logged\n\n", username)
 	return &shared.Response{
 		Name:    request.Name,
-		Err:     !loggedIn,
-		Payload: payload,
+		Err:     false,
+		Payload: fmt.Sprintf("User %s logged", username),
 	}
 }
 

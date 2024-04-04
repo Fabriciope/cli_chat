@@ -21,9 +21,9 @@ func newService(server *Server) *Service {
 	}
 }
 
-func (service *Service) login(ctx context.Context, username string) (bool, string) {
+func (service *Service) login(ctx context.Context, username string) error {
 	if err := service.server.addClient(ctx, username); err != nil {
-		return false, err.Error()
+		return err
 	}
 
 	service.sender.propagateMessage(ctx, shared.Response{
@@ -32,7 +32,7 @@ func (service *Service) login(ctx context.Context, username string) (bool, strin
 		Payload: fmt.Sprintf("%s joined the chat", username),
 	})
 
-	return true, fmt.Sprintf("User %s logged", username)
+	return nil
 }
 
 func (service *Service) sendMessageToEveryone(ctx context.Context, message string) error {
