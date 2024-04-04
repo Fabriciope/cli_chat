@@ -10,7 +10,7 @@ import (
 func (handler *Handler) NewClientResponseHandler(response shared.Response) {
 	chatLine := cui.ChatLine{
 		Info:      "[insert time]",
-		InfoColor: cui.Green,
+		InfoColor: shared.Green,
 		Text:      strings.Trim(response.Payload.(string), " "),
 	}
 	handler.CUI().DrawNewLineInChat(&chatLine)

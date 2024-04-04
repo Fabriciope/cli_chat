@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Fabriciope/cli_chat/shared"
 	tsize "github.com/kopoli/go-terminal-size"
 )
 
@@ -113,7 +114,7 @@ func (cui *CUI) drawLoginInterface() {
 	designer.clearTerminal()
 
 	var startOfCliChatText int16 = int16(cui.consoleWidth/2) - int16(cliChatTextWidth/2)
-	designer.setColor(Blue).print()
+	designer.setColor(shared.Blue).print()
 	for currentLine, text := range cliChatText {
 		designer.setCursorCoordinates(coordinates{x: int16(currentLine + 2), y: startOfCliChatText})
 		designer.setDrawing(text).print()
@@ -122,7 +123,7 @@ func (cui *CUI) drawLoginInterface() {
 
 	startOfLoginBox := startOfCliChatText + 13
 	designer.
-		setCursorColor(White).
+		setCursorColor(shared.White).
 		moveCursor(coordinates{
 			x: 10, y: startOfLoginBox + 3,
 		})
@@ -134,13 +135,13 @@ func (cui *CUI) DrawLoginError(message string) {
 	designer := newConsoleDesigner()
 	var startOfCliChatText int16 = int16(cui.consoleWidth/2) - int16(cliChatTextWidth/2)
 	designer.moveCursor(coordinates{x: 12, y: startOfCliChatText + 15})
-	designer.setDrawing(message).setColor(Red).print()
+	designer.setDrawing(message).setColor(shared.Red).print()
 	designer.resetColors()
 
 	// TODO: limpar login e erro anterior
 	startOfLoginBox := startOfCliChatText + 13
 	designer.
-		setCursorColor(White).
+		setCursorColor(shared.White).
 		moveCursor(coordinates{
 			x: 10, y: startOfLoginBox + 3,
 		})
@@ -152,7 +153,7 @@ func (cui *CUI) drawChatInterface() {
 	designer.clearTerminal()
     defer cui.moveCursorToTypeInChat(designer)
 
-	designer.setColor(White)
+	designer.setColor(shared.White)
 	chatBox := cui.chatBoxToSlice()
 	for currentLine, lineText := range chatBox {
 		designer.setCursorCoordinates(coordinates{x: int16(currentLine + 1), y: 1})
@@ -160,7 +161,7 @@ func (cui *CUI) drawChatInterface() {
 	}
 	designer.resetColors()
 
-	designer.setColor(Yellow)
+	designer.setColor(shared.Yellow)
 	typingBox := cui.typingBoxToSlice()
     startOfDrawing := cui.consoleHeight - cui.typingBoxHeight
 	for currentLine, lineText := range typingBox {
@@ -174,7 +175,7 @@ func (cui *CUI) RedrawTypingBox() {
     designer := newConsoleDesigner()
     defer cui.moveCursorToTypeInChat(designer)
 
-	designer.setColor(Yellow)
+	designer.setColor(shared.Yellow)
 	typingBox := cui.typingBoxToSlice()
     startOfDrawing := cui.consoleHeight - cui.typingBoxHeight
 	for currentLine, line := range typingBox {
@@ -258,7 +259,7 @@ func (cui *CUI) drawChatLines() {
 			setColor(chatLine.InfoColor).
 			setDrawing(chatLine.Info).
 			toStringWithResetColors()
-		designer.setColor(White).setDrawing(info + " " + chatLine.Text).print()
+		designer.setColor(shared.White).setDrawing(info + " " + chatLine.Text).print()
 		designer.resetColors()
 	}
 }
@@ -266,7 +267,7 @@ func (cui *CUI) drawChatLines() {
 func (cui *CUI) moveCursorToTypeInChat(designer *consoleDesigner) {
     designer.resetColors()
 	designer.
-		setCursorColor(White).
+		setCursorColor(shared.White).
 		moveCursor(coordinates{
 			x: cui.xCoordinateToType,
 			y: 5,
@@ -278,7 +279,7 @@ func (cui *CUI) adaptChatLinesOnTerminal() {
 	cui.drawChatLines()
 }
 
-func (cui *CUI) drawLoading(length uint, color escapeCode) error {
+func (cui *CUI) drawLoading(length uint, color shared.ColorCode) error {
 	designer := newConsoleDesigner()
 	designer.setColor(color)
 

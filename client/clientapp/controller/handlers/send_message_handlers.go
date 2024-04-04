@@ -27,7 +27,7 @@ func (handler *Handler) SendMessageInChat(message string) error {
 
 	handler.CUI().DrawNewLineInChat(&cui.ChatLine{
 		Info:      "[insert time] Me: ",
-		InfoColor: cui.Yellow,
+		InfoColor: shared.Yellow,
 		Text:      message,
 	})
 	return nil
@@ -37,7 +37,7 @@ func (handler *Handler) SendMessageInChatResponse(response shared.Response) {
 	if response.Err {
 		handler.CUI().DrawNewLineInChat(&cui.ChatLine{
 			Info:      "[insert time] ",
-			InfoColor: cui.Red,
+			InfoColor: shared.Red,
 			Text:      response.Payload.(string),
 		})
 	}

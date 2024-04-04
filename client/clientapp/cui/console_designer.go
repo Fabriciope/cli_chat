@@ -3,13 +3,15 @@ package cui
 import (
 	"errors"
 	"fmt"
+
+	"github.com/Fabriciope/cli_chat/shared"
 )
 
 // TODO: criar variavies de erro
 
 type consoleDesigner struct {
-	drawingColor escapeCode
-	cursorColor  escapeCode
+	drawingColor shared.ColorCode
+	cursorColor  shared.ColorCode
 
 	cursorCoordinates coordinates
 
@@ -18,19 +20,19 @@ type consoleDesigner struct {
 
 func newConsoleDesigner() *consoleDesigner {
 	return &consoleDesigner{
-		drawingColor:      DefaultColor,
-		cursorColor:       DefaultColor,
+		drawingColor:      shared.DefaultColor,
+		cursorColor:       shared.DefaultColor,
 		cursorCoordinates: coordinates{x: 0, y: 0},
 	}
 }
 
-func (designer *consoleDesigner) setColor(drawingColor escapeCode) *consoleDesigner {
+func (designer *consoleDesigner) setColor(drawingColor shared.ColorCode) *consoleDesigner {
 	designer.drawingColor = drawingColor
 
 	return designer
 }
 
-func (designer *consoleDesigner) setCursorColor(cursorColor escapeCode) *consoleDesigner {
+func (designer *consoleDesigner) setCursorColor(cursorColor shared.ColorCode) *consoleDesigner {
 	designer.cursorColor = cursorColor
 
 	return designer
@@ -145,7 +147,7 @@ func (designer *consoleDesigner) clearTerminal() {
 }
 
 func (designer *consoleDesigner) resetColors() {
-	designer.drawingColor = DefaultColor
-	designer.cursorColor = DefaultColor
+	designer.drawingColor = shared.DefaultColor
+	designer.cursorColor = shared.DefaultColor
 	fmt.Print(reset)
 }
