@@ -151,7 +151,7 @@ func (cui *CUI) DrawLoginError(message string) {
 func (cui *CUI) drawChatInterface() {
 	designer := newConsoleDesigner()
 	designer.clearTerminal()
-    defer cui.moveCursorToTypeInChat(designer)
+	defer cui.moveCursorToTypeInChat(designer)
 
 	designer.setColor(shared.White)
 	chatBox := cui.chatBoxToSlice()
@@ -163,23 +163,23 @@ func (cui *CUI) drawChatInterface() {
 
 	designer.setColor(shared.Yellow)
 	typingBox := cui.typingBoxToSlice()
-    startOfDrawing := cui.consoleHeight - cui.typingBoxHeight
+	startOfDrawing := cui.consoleHeight - cui.typingBoxHeight
 	for currentLine, lineText := range typingBox {
-        currentLine += int(startOfDrawing)
+		currentLine += int(startOfDrawing)
 		designer.setCursorCoordinates(coordinates{x: int16(currentLine), y: 1})
 		designer.setDrawing(lineText).print()
 	}
 }
- 
+
 func (cui *CUI) RedrawTypingBox() {
-    designer := newConsoleDesigner()
-    defer cui.moveCursorToTypeInChat(designer)
+	designer := newConsoleDesigner()
+	defer cui.moveCursorToTypeInChat(designer)
 
 	designer.setColor(shared.Yellow)
 	typingBox := cui.typingBoxToSlice()
-    startOfDrawing := cui.consoleHeight - cui.typingBoxHeight
+	startOfDrawing := cui.consoleHeight - cui.typingBoxHeight
 	for currentLine, line := range typingBox {
-        currentLine += int(startOfDrawing)
+		currentLine += int(startOfDrawing)
 		designer.setCursorCoordinates(coordinates{x: int16(currentLine), y: 1})
 		designer.setDrawing(line).print()
 	}
@@ -192,7 +192,7 @@ func (cui *CUI) chatBoxToSlice() (chatBox []string) {
 
 		if lineNumber == 0 {
 			amountOfSpaces := int(cui.consoleWidth) - 10
-            lineStr = fmt.Sprintf(` ┌──CHAT%s┐ `, strings.Repeat(`─`, amountOfSpaces))
+			lineStr = fmt.Sprintf(` ┌──CHAT%s┐ `, strings.Repeat(`─`, amountOfSpaces))
 			chatBox[lineNumber] = lineStr
 			continue
 		}
@@ -224,7 +224,7 @@ func (cui *CUI) typingBoxToSlice() (typingBox []string) {
 			lineStr = fmt.Sprintf(` │%s│ `, strings.Repeat(` `, amountOfSpaces))
 		}
 
-        typingBox[lineNumber] = lineStr
+		typingBox[lineNumber] = lineStr
 	}
 
 	return
@@ -242,30 +242,36 @@ func (cui *CUI) addChatLine(line *ChatLine) {
 
 func (cui *CUI) checkIfChatLinesExceededTheLimit() {
 	numberOfVisibleLines := uint16(len(cui.chatLines))
-	if numberOfVisibleLines >= cui.chatBoxHeight {
-		diff := numberOfVisibleLines - cui.chatBoxHeight
-		cui.chatLines = cui.chatLines[diff+1:]
+	if numberOfVisibleLines > (cui.chatBoxHeight - 3) {
+		diff := numberOfVisibleLines - (cui.chatBoxHeight - 3)
+		cui.chatLines = cui.chatLines[diff:]
 	}
 }
 
+// TODO: tentar resolver problema quando a mensagem passa do limite da tela
 func (cui *CUI) drawChatLines() {
 	designer := newConsoleDesigner()
-    defer cui.moveCursorToTypeInChat(designer)
+	defer cui.moveCursorToTypeInChat(designer)
 
 	for key, chatLine := range cui.chatLines {
-		designer.setCursorCoordinates(coordinates{x: int16(key + 2), y: 3})
-
 		info := newConsoleDesigner().
 			setColor(chatLine.InfoColor).
 			setDrawing(chatLine.Info).
 			toStringWithResetColors()
-		designer.setColor(shared.White).setDrawing(info + " " + chatLine.Text).print()
+		lineText := info + " " + chatLine.Text
+		amountOfSpaces := (int(cui.consoleWidth) - 4) - len(chatLine.Info+" "+chatLine.Text)
+		lineStr := fmt.Sprintf(` │%s%s│ `, lineText, strings.Repeat(" ", amountOfSpaces))
+
+		designer.setCursorCoordinates(coordinates{x: int16(key + 2), y: 1})
+		designer.eraseLine()
+
+		designer.setColor(shared.White).setDrawing(lineStr).print()
 		designer.resetColors()
 	}
 }
 
 func (cui *CUI) moveCursorToTypeInChat(designer *consoleDesigner) {
-    designer.resetColors()
+	designer.resetColors()
 	designer.
 		setCursorColor(shared.White).
 		moveCursor(coordinates{

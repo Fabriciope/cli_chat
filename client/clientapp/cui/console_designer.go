@@ -135,9 +135,9 @@ func (designer *consoleDesigner) toStringWithResetColors() string {
 
 	return fmt.Sprintf(
 		"%s%s%s%s",
+		moveCursorCode,
 		designer.drawingColor,
 		designer.drawing,
-		moveCursorCode,
 		reset,
 	)
 }
@@ -150,4 +150,18 @@ func (designer *consoleDesigner) resetColors() {
 	designer.drawingColor = shared.DefaultColor
 	designer.cursorColor = shared.DefaultColor
 	fmt.Print(reset)
+}
+
+func (designer *consoleDesigner) eraseLine() {
+	var moveCursorCode string
+
+	if x := designer.cursorCoordinates.x; x != 0 {
+		replaces := map[string]int16{
+			"lines":   x,
+			"columns": 1,
+		}
+		moveCursorCode, _ = replaceInEscapeCode(moveCursor, replaces)
+	}
+
+	fmt.Print(moveCursorCode, eraseLine)
 }

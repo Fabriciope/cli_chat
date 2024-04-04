@@ -24,6 +24,7 @@ const (
 	restoreCursor escapeCode = "\x1b[u"
 	hideCursor    escapeCode = "\x1b[?25l"
 	showCursor    escapeCode = "\x1b[?25h"
+	eraseLine     escapeCode = "\x1b[2K"
 
 	bold       escapeCode = "\x1b[1m"
 	dim        escapeCode = "\x1b[2m"
