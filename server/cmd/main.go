@@ -12,6 +12,6 @@ func main() {
 		log.Panicln(err)
 		return
 	}
-	
+
 	server.InitServer()
 }

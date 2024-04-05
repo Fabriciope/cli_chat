@@ -73,7 +73,7 @@ func (server *Server) clientHandler(ctx context.Context) {
 		var buf [1024]byte
 		bufSize, err := conn.Read(buf[0:])
 		if err != nil {
-			return
+			return // TODO: informar que o usuario foi desconectado e retirar do server.clients
 		}
 
 		var request shared.Request
@@ -121,14 +121,14 @@ func (server *Server) addClient(ctx context.Context, username string) error {
 
 	conn := ctx.Value("connection").(*net.TCPConn)
 
-    var chosenColor shared.ColorCode
-    loop:
-    for _, color := range availableColors {
-        if !server.colorIsAlreadyInUser(color) {
-            chosenColor = color
-            break loop
-        }
-    }
+	var chosenColor shared.ColorCode
+loop:
+	for _, color := range availableColors {
+		if !server.colorIsAlreadyInUser(color) {
+			chosenColor = color
+			break loop
+		}
+	}
 	client := newClient(conn, username, chosenColor)
 
 	server.lock()
@@ -149,13 +149,13 @@ func (server *Server) hasClient(username string) bool {
 }
 
 func (server *Server) colorIsAlreadyInUser(color shared.ColorCode) bool {
-    for i := range server.clients {
-        if server.clients[i].color == color {
-            return true
-        }
-    }
+	for i := range server.clients {
+		if server.clients[i].color == color {
+			return true
+		}
+	}
 
-    return false
+	return false
 }
 
 func (server *Server) userByRemoteAddr(remoteAddr string) (*Client, error) {

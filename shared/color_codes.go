@@ -2,7 +2,6 @@ package shared
 
 type ColorCode string
 
-// TODO: adptar as cui package
 const (
 	DefaultColor  ColorCode = "\x1b[39m"
 	Black         ColorCode = "\x1b[30m"

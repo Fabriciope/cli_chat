@@ -26,9 +26,9 @@ const (
 type MyUser struct {
 	connection   *net.TCPConn
 	inputScanner *bufio.Scanner
-    controller *controller.Controller
-	cui *cui.CUI
-	loggedIn bool
+	controller   *controller.Controller
+	cui          *cui.CUI
+	loggedIn     bool
 }
 
 func NewUser() (*MyUser, error) {
@@ -44,16 +44,15 @@ func NewUser() (*MyUser, error) {
 		return nil, err
 	}
 
-
-    myUser := &MyUser{
+	myUser := &MyUser{
 		connection:   conn,
 		inputScanner: bufio.NewScanner(os.Stdin),
 		cui:          cui,
 		loggedIn:     false,
 	}
-    myUser.controller = controller.NewController(handlers.NewHandler(myUser))
+	myUser.controller = controller.NewController(handlers.NewHandler(myUser))
 
-    return myUser, nil
+	return myUser, nil
 }
 
 // TODO: fazer algo quando a conexao com o servidor e perdida
@@ -73,10 +72,10 @@ func (user *MyUser) login() {
 		username := strings.Trim(user.inputScanner.Text(), " ")
 		if username == "" {
 			user.CUI().DrawLoginError("invalid username!")
-            continue
+			continue
 		}
 
-        err := user.controller.LoginHandler()(username)
+		err := user.controller.LoginHandler()(username)
 		if err != nil {
 			user.CUI().DrawLoginError(err.Error() + ", try again.")
 			continue
