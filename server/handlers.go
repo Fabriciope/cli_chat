@@ -28,7 +28,7 @@ func (rh *RequestHandlers) loginHandler(ctx context.Context, request shared.Requ
 	err := rh.service.login(ctx, username)
 	if err != nil {
 		errStr := err.Error()
-		log.Printf("cannot log in %s: %s\n\n", username, errStr)
+		log.Printf("cannot log in %s: %s\n", username, errStr)
 		return &shared.Response{
 			Name:    request.Name,
 			Err:     true,
@@ -36,7 +36,7 @@ func (rh *RequestHandlers) loginHandler(ctx context.Context, request shared.Requ
 		}
 	}
 
-	log.Printf("client %s logged\n\n", username)
+	log.Printf("client %s logged\n", username)
 	return &shared.Response{
 		Name:    request.Name,
 		Err:     false,

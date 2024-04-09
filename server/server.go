@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net"
 	"sync"
@@ -75,7 +76,14 @@ func (server *Server) clientHandler(ctx context.Context) {
 		var buf [1024]byte
 		bufSize, err := conn.Read(buf[0:])
 		if err != nil {
-			return // TODO: informar que o usuario foi desconectado e retirar do server.clients
+			client, _ := server.userByRemoteAddr(conn.RemoteAddr().String())
+			server.removeClient(conn.RemoteAddr().String())
+			sender.sendMessage(conn, shared.Response{
+				Name:    shared.LogoutActionName,
+				Err:     false,
+				Payload: fmt.Sprintf("%s disconnected from the chat", client.username),
+			})
+			return
 		}
 
 		var request shared.Request
@@ -126,7 +134,7 @@ func (server *Server) addClient(ctx context.Context, username string) error {
 	var chosenColor escapecode.ColorCode
 loop:
 	for _, color := range availableColors {
-		if !server.colorIsAlreadyInUser(color) {
+		if !server.colorIsAlreadyInUse(color) {
 			chosenColor = color
 			break loop
 		}
@@ -135,6 +143,19 @@ loop:
 
 	server.lock()
 	server.clients[conn.RemoteAddr().String()] = client
+	server.unlock()
+
+	return nil
+}
+
+func (server *Server) removeClient(remoteAddr string) error {
+	client, err := server.userByRemoteAddr(remoteAddr)
+	if err != nil {
+		return err
+	}
+
+	server.lock()
+	delete(server.clients, client.RemoteAddr())
 	server.unlock()
 
 	return nil
@@ -150,7 +171,7 @@ func (server *Server) hasClient(username string) bool {
 	return false
 }
 
-func (server *Server) colorIsAlreadyInUser(color escapecode.ColorCode) bool {
+func (server *Server) colorIsAlreadyInUse(color escapecode.ColorCode) bool {
 	for i := range server.clients {
 		if server.clients[i].color == color {
 			return true
