@@ -8,13 +8,11 @@ import (
 	"github.com/Fabriciope/cli_chat/pkg/shared"
 )
 
-// TODO: resolver problema quando escreve e acumula o texto
 func (handler *Handler) SendMessageInChat(message string) error {
 	if !handler.user.LoggedIn() {
 		return errors.New("you must be logged in to send messages in chat")
 	}
 
-	// TODO: verificar se a mensagem esta vazia
 	err := handler.sender.SendRequest(shared.Request{
 		Name:    shared.SendMessageActionName,
 		Payload: message,

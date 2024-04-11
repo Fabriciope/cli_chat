@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"github.com/Fabriciope/cli_chat/client/cui"
 	"github.com/Fabriciope/cli_chat/client/interfaces"
 	"github.com/Fabriciope/cli_chat/client/sender"
 	"github.com/Fabriciope/cli_chat/pkg/shared"
@@ -33,6 +32,6 @@ func (handler *Handler) ResponseHandler(string) ResponseHandler {
 	return nil
 }
 
-func (handler *Handler) CUI() *cui.CUI {
+func (handler *Handler) CUI() interfaces.CUI {
 	return handler.user.CUI()
 }

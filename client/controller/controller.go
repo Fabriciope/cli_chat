@@ -78,7 +78,6 @@ func (controller *Controller) findHandlerAndRun(command string) {
 
 func (controller *Controller) HandleResponse(response shared.Response) {
 	if response.Err && response.Name == "unknown" {
-		// TODO: jogar todos os logs para um arquivo e tratar o erro de outra maneira
 		log.Fatalf("error name: %s - msg: %s", response.Name, response.Payload)
 		return
 	}
