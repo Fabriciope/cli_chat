@@ -32,12 +32,13 @@ const (
 )
 
 type CUI struct {
-	consoleHeight     uint16
-	consoleWidth      uint16
-	chatBoxHeight     uint16
-	typingBoxHeight   uint16
-	xCoordinateToType int16
-	sizeListener      *tsize.SizeListener
+	consoleHeight          uint16
+	consoleWidth           uint16
+	chatBoxHeight          uint16
+	typingBoxHeight        uint16
+	xCoordinateToType      int16
+	xCoordinateToTypeLogin int16
+	sizeListener           *tsize.SizeListener
 
 	currentInterface string
 	logged           chan bool
@@ -57,15 +58,16 @@ func NewCUI() (*CUI, error) {
 
 	typingBoxHeight := uint16(10)
 	var cui = &CUI{
-		consoleHeight:     uint16(size.Height),
-		consoleWidth:      uint16(size.Width),
-		chatBoxHeight:     uint16(size.Height) - typingBoxHeight,
-		xCoordinateToType: int16(uint16(size.Height) - 9),
-		typingBoxHeight:   typingBoxHeight,
-		sizeListener:      listener,
-		currentInterface:  interfaces[login],
-		logged:            make(chan bool),
-		chatLines:         make([]*ChatLine, 0),
+		consoleHeight:          uint16(size.Height),
+		consoleWidth:           uint16(size.Width),
+		chatBoxHeight:          uint16(size.Height) - typingBoxHeight,
+		xCoordinateToType:      int16(uint16(size.Height) - 9),
+		xCoordinateToTypeLogin: 10,
+		typingBoxHeight:        typingBoxHeight,
+		sizeListener:           listener,
+		currentInterface:       interfaces[login],
+		logged:                 make(chan bool),
+		chatLines:              make([]*ChatLine, 0),
 	}
 
 	return cui, nil
@@ -126,7 +128,7 @@ func (cui *CUI) drawLoginInterface() {
 	designer.
 		setCursorColor(escapecode.White).
 		moveCursor(coordinates{
-			x: 10, y: startOfLoginBox + 3,
+			x: cui.xCoordinateToTypeLogin, y: startOfLoginBox + 3,
 		})
 
 	cui.currentInterface = interfaces[login]
@@ -134,17 +136,23 @@ func (cui *CUI) drawLoginInterface() {
 
 func (cui *CUI) DrawLoginError(message string) {
 	designer := newConsoleDesigner()
-	var startOfCliChatText int16 = int16(cui.consoleWidth/2) - int16(cliChatTextWidth/2)
-	designer.moveCursor(coordinates{x: 12, y: startOfCliChatText + 15})
-	designer.setDrawing(message).setColor(escapecode.Red).print()
-	designer.resetColors()
+	startOfError := cui.xCoordinateToTypeLogin + 2
 
-	// TODO: limpar login e erro anterior
+	// clear old error message
+	linesToClear := int16(cui.consoleHeight) - startOfError
+	for cLine := startOfError; cLine <= linesToClear; cLine++ {
+		designer.eraseLineWithXCoordinates(cLine)
+	}
+
+	startOfCliChatText := int16(cui.consoleWidth/2) - int16(cliChatTextWidth/2)
+	designer.moveCursor(coordinates{x: startOfError, y: startOfCliChatText + 15})
+	designer.setDrawing(message).setColor(escapecode.Red).printAndResetColors()
+
 	startOfLoginBox := startOfCliChatText + 13
 	designer.
 		setCursorColor(escapecode.White).
 		moveCursor(coordinates{
-			x: 10, y: startOfLoginBox + 3,
+			x: cui.xCoordinateToTypeLogin, y: startOfLoginBox + 3,
 		})
 }
 
@@ -250,7 +258,6 @@ func (cui *CUI) checkIfChatLinesExceededTheLimit() {
 }
 
 // TODO: tentar resolver problema quando a mensagem passa do limite da tela
-// TODO: resolver problema de duplicidade
 func (cui *CUI) drawChatLines() {
 	designer := newConsoleDesigner()
 	defer cui.moveCursorToTypeInChat(designer)

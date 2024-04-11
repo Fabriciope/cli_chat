@@ -43,7 +43,7 @@ func (designer *consoleDesigner) setCursorCoordinates(coordinates coordinates) *
 	return designer
 }
 
-func (designer *consoleDesigner) moveCursor(coordinates coordinates) {
+func (designer *consoleDesigner) moveCursor(coordinates coordinates) *consoleDesigner {
 	replaces := map[string]int16{
 		"lines":   coordinates.x,
 		"columns": coordinates.y,
@@ -51,6 +51,8 @@ func (designer *consoleDesigner) moveCursor(coordinates coordinates) {
 	fmt.Print(designer.cursorColor)
 	code, _ := escapecode.ReplaceInEscapeCode(escapecode.MoveCursor, replaces)
 	fmt.Print(code)
+
+	return designer
 }
 
 func (designer *consoleDesigner) setDrawing(drawing string) *consoleDesigner {
@@ -165,3 +167,17 @@ func (designer *consoleDesigner) eraseLine() {
 
 	fmt.Print(moveCursorCode, escapecode.EraseLine)
 }
+
+func (designer *consoleDesigner) eraseLineWithXCoordinates(x int16) {
+	var moveCursorCode string
+
+	replaces := map[string]int16{
+		"lines":   x,
+		"columns": 1,
+	}
+	moveCursorCode, _ = escapecode.ReplaceInEscapeCode(escapecode.MoveCursor, replaces)
+
+	fmt.Print(moveCursorCode, escapecode.EraseLine)
+}
+
+// TODO: eraseCurrentLine()
