@@ -6,6 +6,7 @@ import (
 	"github.com/Fabriciope/cli_chat/pkg/escapecode"
 )
 
+// TODO: trocar esquema de cores do sistema
 var availableColors = []escapecode.ColorCode{
 	//	escapecode.Black,
 	//	escapecode.Red,

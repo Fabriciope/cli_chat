@@ -108,7 +108,6 @@ func (server *Server) clientHandler(ctx context.Context) {
 func (server *Server) handleRequest(ctx context.Context, request shared.Request) *shared.Response {
 	for actionName, handler := range server.handlersForRequests {
 		if actionName == request.Name {
-			// TODO: serealizar os dados de entrada
 			return handler(ctx, request)
 		}
 	}

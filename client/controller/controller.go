@@ -56,7 +56,6 @@ func (controller *Controller) LoginHandler() func(string) error {
 }
 
 func (controller *Controller) HandleInput(input string) {
-	// TODO: serealizar input
 	input = strings.Trim(input, " ")
 
 	if strings.HasPrefix(input, ":") {

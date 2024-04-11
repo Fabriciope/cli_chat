@@ -11,6 +11,7 @@ import (
 	"github.com/Fabriciope/cli_chat/client/controller"
 	"github.com/Fabriciope/cli_chat/client/controller/handler"
 	"github.com/Fabriciope/cli_chat/client/cui"
+	"github.com/Fabriciope/cli_chat/pkg/escapecode"
 	"github.com/Fabriciope/cli_chat/pkg/shared"
 )
 
@@ -31,6 +32,7 @@ type User struct {
 	loggedIn     bool
 }
 
+// TODO: recever cui como parametro como interface
 func NewUser() (*User, error) {
 	remoteAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", remoteIp, remotePort))
 	//localAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", localIp, localPort))
@@ -55,9 +57,12 @@ func NewUser() (*User, error) {
 	return myUser, nil
 }
 
-// TODO: fazer algo quando a conexao com o servidor e perdida
+func (user *User) CloseConnection() error {
+	return user.connection.Close()
+}
+
 func (user *User) InitChat() {
-	defer user.connection.Close()
+	defer user.CloseConnection()
 
 	go user.CUI().InitApp()
 
@@ -90,6 +95,16 @@ func (user *User) listenToServer() {
 		var buf = make([]byte, 1024)
 		n, err := user.connection.Read(buf)
 		if err != nil {
+			// TODO: fazer algo quando a conexao com o servidor e perdida
+			// TODO: tirar o parametro chatLine como um ponteiro no cui
+			// TODO: tira o Info field do chatline e deixar somento o timestamp
+			user.cui.DrawNewLineInChat(&cui.ChatLine{
+				Info:      "[insert time]",
+				InfoColor: escapecode.Red,
+				Text:      "connection to the server was lost",
+			})
+			user.CloseConnection()
+			os.Exit(1)
 			return
 		}
 
@@ -114,7 +129,7 @@ func (user *User) listenToInput() {
 			continue
 		}
 
-		user.controller.HandleInput(user.inputScanner.Text())
+		user.controller.HandleInput(input)
 		user.CUI().RedrawTypingBox()
 	}
 }
