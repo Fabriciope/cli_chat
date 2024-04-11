@@ -40,7 +40,6 @@ func NewServer() (*Server, error) {
 	}, nil
 }
 
-// TODO: capturar err no main e antes do servido fechar avisar o usuarios (o mesmo no client)
 func (server *Server) InitServer() {
 	handlers := newRequestHandlers(server)
 	server.setHandlerForEachRequest(handlers)
@@ -77,11 +76,12 @@ func (server *Server) clientHandler(ctx context.Context) {
 		bufSize, err := conn.Read(buf[0:])
 		if err != nil {
 			client, _ := server.userByRemoteAddr(conn.RemoteAddr().String())
+			username := client.username
 			server.removeClient(conn.RemoteAddr().String())
 			sender.sendMessage(conn, shared.Response{
 				Name:    shared.LogoutActionName,
 				Err:     false,
-				Payload: fmt.Sprintf("%s disconnected from the chat", client.username),
+				Payload: fmt.Sprintf("%s disconnected from the chat", username),
 			})
 			return
 		}
