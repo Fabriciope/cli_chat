@@ -2,6 +2,7 @@ package cui
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -77,7 +78,7 @@ func (cui *CUI) SetLoggedAs(logged bool) {
 	cui.logged <- logged
 }
 
-func (cui *CUI) InitApp() {
+func (cui *CUI) InitConsoleUserInterface() {
 	cui.drawLoginInterface()
 	go cui.listenToConsoleSize()
 
@@ -295,6 +296,24 @@ func (cui *CUI) moveCursorToTypeInChat(designer *consoleDesigner) {
 func (cui *CUI) adaptChatLinesOnTerminal() {
 	cui.checkIfChatLinesExceededTheLimit()
 	cui.drawChatLines()
+}
+
+func (cui *CUI) DrawLineAndExit(code uint8, chatLine ChatLine) {
+	designer := newConsoleDesigner()
+	designer.clearTerminal()
+
+	info := newConsoleDesigner().
+		setColor(chatLine.InfoColor).
+		setDrawing(chatLine.Info).
+		toStringWithResetColors()
+	lineStr := info + " " + chatLine.Text
+	designer.
+		setCursorCoordinates(coordinates{
+			x: 1, y: 1,
+		}).
+		setDrawing(lineStr + "\n").
+		printAndResetColors()
+	os.Exit(int(code))
 }
 
 func (cui *CUI) drawLoading(length uint, color escapecode.ColorCode) error {
