@@ -6,6 +6,7 @@ import (
 	"github.com/Fabriciope/cli_chat/pkg/shared"
 )
 
+// TODO: instanciar o handler no controller e tirar a dependencia do handler no client e colocar o client como campo no Handler
 type CommandHandler func() error
 type CommandsHandlersMap map[string]CommandHandler
 type ResponseHandler func(shared.Response)

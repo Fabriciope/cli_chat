@@ -9,4 +9,5 @@ type CUI interface {
 	RedrawTypingBox()
 	DrawLoginError(string)
 	DrawLineAndExit(uint8, cui.ChatLine)
+	DrawNewLineForInternalError()
 }

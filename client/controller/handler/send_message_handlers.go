@@ -1,24 +1,28 @@
 package handler
 
 import (
-	"errors"
-
 	"github.com/Fabriciope/cli_chat/client/cui"
 	"github.com/Fabriciope/cli_chat/pkg/escapecode"
 	"github.com/Fabriciope/cli_chat/pkg/shared"
 )
 
-func (handler *Handler) SendMessageInChat(message string) error {
+func (handler *Handler) SendMessageInChat(message string) {
 	if !handler.user.LoggedIn() {
-		return errors.New("you must be logged in to send messages in chat")
+		handler.CUI().DrawNewLineInChat(&cui.ChatLine{
+			Info:      "[insert time] Me:",
+			InfoColor: escapecode.Yellow,
+			Text:      "you must be logged in to send messages in chat",
+		})
+		return
 	}
 
-	err := handler.sender.SendRequest(shared.Request{
+	request := shared.Request{
 		Name:    shared.SendMessageActionName,
 		Payload: message,
-	})
+	}
+	err := handler.sender.SendRequest(request)
 	if err != nil {
-		return err
+		handler.CUI().DrawNewLineForInternalError()
 	}
 
 	handler.CUI().DrawNewLineInChat(&cui.ChatLine{
@@ -26,7 +30,6 @@ func (handler *Handler) SendMessageInChat(message string) error {
 		InfoColor: escapecode.Yellow,
 		Text:      message,
 	})
-	return nil
 }
 
 func (handler *Handler) SendMessageInChatResponse(response shared.Response) {

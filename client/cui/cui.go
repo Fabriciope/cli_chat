@@ -245,6 +245,15 @@ func (cui *CUI) DrawNewLineInChat(line *ChatLine) {
 	cui.drawChatLines()
 }
 
+func (cui *CUI) DrawNewLineForInternalError() {
+	cui.addChatLine(&ChatLine{
+		Info:      "[insert time]",
+		InfoColor: escapecode.Red,
+		Text:      "iternal error",
+	})
+	cui.drawChatLines()
+}
+
 func (cui *CUI) addChatLine(line *ChatLine) {
 	cui.chatLines = append(cui.chatLines, line)
 	cui.checkIfChatLinesExceededTheLimit()
