@@ -9,5 +9,6 @@ type CUI interface {
 	RedrawTypingBox()
 	DrawLoginError(string)
 	DrawLineAndExit(uint8, cui.ChatLine)
-	DrawNewLineForInternalError()
+	// TODO: mandar os erros internos para um arquivo de log e criar um package logger para fazer isso
+	DrawNewLineForInternalError(string)
 }

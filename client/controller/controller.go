@@ -2,7 +2,6 @@ package controller
 
 import (
 	"errors"
-	"log"
 	"strings"
 
 	"github.com/Fabriciope/cli_chat/client/controller/handler"
@@ -91,15 +90,15 @@ func (controller *Controller) findHandlerAndRun(command string) {
 }
 
 func (controller *Controller) HandleResponse(response dto.Response) {
+	// TODO: criar action name desconhecido
 	if response.Err && response.Name == "unknown" {
-		log.Fatalf("error name: %s - msg: %s", response.Name, response.Payload)
-		controller.handler.CUI().DrawNewLineForInternalError()
+		controller.handler.CUI().DrawNewLineForInternalError(response.Payload.(string))
 		return
 	}
 
 	handler, err := controller.responseHandler(response.Name)
 	if err != nil {
-		controller.handler.CUI().DrawNewLineForInternalError()
+		controller.handler.CUI().DrawNewLineForInternalError(err.Error())
 		return
 	}
 

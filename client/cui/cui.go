@@ -245,11 +245,11 @@ func (cui *CUI) DrawNewLineInChat(line *ChatLine) {
 	cui.drawChatLines()
 }
 
-func (cui *CUI) DrawNewLineForInternalError() {
+func (cui *CUI) DrawNewLineForInternalError(message string) {
 	cui.addChatLine(&ChatLine{
-		Info:      "[insert time]",
+		Info:      "[insert time] internal error:",
 		InfoColor: escapecode.Red,
-		Text:      "iternal error",
+		Text:      message,
 	})
 	cui.drawChatLines()
 }
