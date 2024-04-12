@@ -1,7 +1,7 @@
 package interfaces
 
-import "github.com/Fabriciope/cli_chat/pkg/shared"
+import "github.com/Fabriciope/cli_chat/pkg/shared/dto"
 
 type Sender interface {
-	SendRequest(shared.Request) error
+	SendRequest(dto.Request) error
 }

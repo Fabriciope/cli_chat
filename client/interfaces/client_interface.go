@@ -3,7 +3,7 @@ package interfaces
 import (
 	"net"
 
-	"github.com/Fabriciope/cli_chat/pkg/shared"
+	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
 
 type Client interface {
@@ -11,6 +11,6 @@ type Client interface {
 	LoggedIn() bool
 	SetLoggedInAs(bool)
 	CUI() CUI
-	AwaitResponseFromServer() (shared.Response, error)
+	AwaitResponseFromServer() (dto.Response, error)
 	// TODO: estudar injecao ee depedencia e inversao de dependencia
 }

@@ -10,7 +10,7 @@ import (
 	"sync"
 
 	"github.com/Fabriciope/cli_chat/pkg/escapecode"
-	"github.com/Fabriciope/cli_chat/pkg/shared"
+	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
 
 const (
@@ -48,8 +48,8 @@ func (server *Server) InitServer() {
 
 func (server *Server) setHandlerForEachRequest(handlers *RequestHandlers) {
 	server.handlersForRequests = handlersMap{
-		shared.LoginActionName:       (*handlers).loginHandler,
-		shared.SendMessageActionName: (*handlers).sendMessageInChat,
+		dto.LoginActionName:       (*handlers).loginHandler,
+		dto.SendMessageActionName: (*handlers).sendMessageInChat,
 	}
 }
 
@@ -78,18 +78,18 @@ func (server *Server) clientHandler(ctx context.Context) {
 			client, _ := server.userByRemoteAddr(conn.RemoteAddr().String())
 			username := client.username
 			server.removeClient(conn.RemoteAddr().String())
-			sender.sendMessage(conn, shared.Response{
-				Name:    shared.LogoutActionName,
+			sender.sendMessage(conn, dto.Response{
+				Name:    dto.LogoutActionName,
 				Err:     false,
 				Payload: fmt.Sprintf("%s disconnected from the chat", username),
 			})
 			return
 		}
 
-		var request shared.Request
+		var request dto.Request
 
 		if err = json.Unmarshal(buf[:bufSize], &request); err != nil {
-			sender.sendMessage(conn, shared.Response{
+			sender.sendMessage(conn, dto.Response{
 				Name:    "unknown",
 				Err:     true,
 				Payload: "Invalid request",
@@ -97,7 +97,7 @@ func (server *Server) clientHandler(ctx context.Context) {
 			return
 		}
 
-		var response *shared.Response = server.handleRequest(ctx, request)
+		var response *dto.Response = server.handleRequest(ctx, request)
 		err = sender.sendMessage(conn, *response)
 		if err != nil {
 			return
@@ -105,14 +105,14 @@ func (server *Server) clientHandler(ctx context.Context) {
 	}
 }
 
-func (server *Server) handleRequest(ctx context.Context, request shared.Request) *shared.Response {
+func (server *Server) handleRequest(ctx context.Context, request dto.Request) *dto.Response {
 	for actionName, handler := range server.handlersForRequests {
 		if actionName == request.Name {
 			return handler(ctx, request)
 		}
 	}
 
-	return &shared.Response{Name: "unknown", Err: true, Payload: "Action name unknown"}
+	return &dto.Response{Name: "unknown", Err: true, Payload: "Action name unknown"}
 }
 
 func (server *Server) lock() {

@@ -3,13 +3,13 @@ package handler
 import (
 	"github.com/Fabriciope/cli_chat/client/interfaces"
 	"github.com/Fabriciope/cli_chat/client/sender"
-	"github.com/Fabriciope/cli_chat/pkg/shared"
+	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
 
 // TODO: instanciar o handler no controller e tirar a dependencia do handler no client e colocar o client como campo no Handler
 type CommandHandler func() error
 type CommandsHandlersMap map[string]CommandHandler
-type ResponseHandler func(shared.Response)
+type ResponseHandler func(dto.Response)
 type ResponsesHandlersMap map[string]ResponseHandler
 
 type Handler struct {

@@ -5,10 +5,10 @@ import (
 
 	"github.com/Fabriciope/cli_chat/client/cui"
 	"github.com/Fabriciope/cli_chat/pkg/escapecode"
-	"github.com/Fabriciope/cli_chat/pkg/shared"
+	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
 
-func (handler *Handler) NewClientResponseHandler(response shared.Response) {
+func (handler *Handler) NewClientResponseHandler(response dto.Response) {
 	chatLine := cui.ChatLine{
 		Info:      "[insert time]",
 		InfoColor: escapecode.Green,

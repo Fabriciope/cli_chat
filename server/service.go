@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/Fabriciope/cli_chat/pkg/shared"
+	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
 
 type Service struct {
@@ -26,8 +26,8 @@ func (service *Service) login(ctx context.Context, username string) error {
 		return err
 	}
 
-	service.sender.propagateMessage(ctx, shared.Response{
-		Name:    shared.NewClientNotificationName,
+	service.sender.propagateMessage(ctx, dto.Response{
+		Name:    dto.NewClientNotificationName,
 		Err:     false,
 		Payload: fmt.Sprintf("%s joined the chat", username),
 	})
@@ -43,7 +43,7 @@ func (service *Service) sendMessageToEveryone(ctx context.Context, message strin
 		return err
 	}
 
-	textMessage, err := json.Marshal(shared.TextMessage{
+	textMessage, err := json.Marshal(dto.TextMessage{
 		Username:  client.username,
 		UserColor: client.color,
 		Message:   message,
@@ -52,8 +52,8 @@ func (service *Service) sendMessageToEveryone(ctx context.Context, message strin
 		return err
 	}
 
-	return service.sender.propagateMessage(ctx, shared.Response{
-		Name:    shared.NewMessageNotificationName,
+	return service.sender.propagateMessage(ctx, dto.Response{
+		Name:    dto.NewMessageNotificationName,
 		Err:     false,
 		Payload: string(textMessage),
 	})

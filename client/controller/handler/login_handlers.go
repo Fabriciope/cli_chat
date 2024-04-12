@@ -3,11 +3,11 @@ package handler
 import (
 	"errors"
 
-	"github.com/Fabriciope/cli_chat/pkg/shared"
+	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
 
 func (handler *Handler) LoginHandler(username string) error {
-	request := shared.Request{Name: shared.LoginActionName, Payload: username}
+	request := dto.Request{Name: dto.LoginActionName, Payload: username}
 	err := handler.sender.SendRequest(request)
 	if err != nil {
 		return err
@@ -22,7 +22,7 @@ func (handler *Handler) LoginHandler(username string) error {
 	return handler.LoginResponseHandler(response)
 }
 
-func (handler *Handler) LoginResponseHandler(response shared.Response) error {
+func (handler *Handler) LoginResponseHandler(response dto.Response) error {
 	if response.Err {
 		return errors.New(response.Payload.(string))
 	}

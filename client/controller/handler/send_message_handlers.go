@@ -3,7 +3,7 @@ package handler
 import (
 	"github.com/Fabriciope/cli_chat/client/cui"
 	"github.com/Fabriciope/cli_chat/pkg/escapecode"
-	"github.com/Fabriciope/cli_chat/pkg/shared"
+	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
 
 func (handler *Handler) SendMessageInChat(message string) {
@@ -16,8 +16,8 @@ func (handler *Handler) SendMessageInChat(message string) {
 		return
 	}
 
-	request := shared.Request{
-		Name:    shared.SendMessageActionName,
+	request := dto.Request{
+		Name:    dto.SendMessageActionName,
 		Payload: message,
 	}
 	err := handler.sender.SendRequest(request)
@@ -32,7 +32,7 @@ func (handler *Handler) SendMessageInChat(message string) {
 	})
 }
 
-func (handler *Handler) SendMessageInChatResponse(response shared.Response) {
+func (handler *Handler) SendMessageInChatResponse(response dto.Response) {
 	if response.Err {
 		handler.CUI().DrawNewLineInChat(&cui.ChatLine{
 			Info:      "[insert time] ERROR FROM SERVER:",

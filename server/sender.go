@@ -6,7 +6,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/Fabriciope/cli_chat/pkg/shared"
+	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
 
 type responseSender struct {
@@ -17,7 +17,7 @@ func newResponseSender(server *Server) *responseSender {
 	return &responseSender{server: server}
 }
 
-func (sender *responseSender) propagateMessage(ctx context.Context, response shared.Response) error {
+func (sender *responseSender) propagateMessage(ctx context.Context, response dto.Response) error {
 	conn := ctx.Value("connection").(*net.TCPConn)
 	responseJson, _ := json.Marshal(response)
 
@@ -55,7 +55,7 @@ func (sender *responseSender) propagateMessage(ctx context.Context, response sha
 	return nil
 }
 
-func (sender *responseSender) sendMessage(receiver *net.TCPConn, response shared.Response) (err error) {
+func (sender *responseSender) sendMessage(receiver *net.TCPConn, response dto.Response) (err error) {
 	responseJson, _ := json.Marshal(response)
 
 	sender.server.lock()

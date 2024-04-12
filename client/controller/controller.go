@@ -8,7 +8,7 @@ import (
 	"github.com/Fabriciope/cli_chat/client/controller/handler"
 	"github.com/Fabriciope/cli_chat/client/cui"
 	"github.com/Fabriciope/cli_chat/pkg/escapecode"
-	"github.com/Fabriciope/cli_chat/pkg/shared"
+	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
 
 type Controller struct {
@@ -38,9 +38,9 @@ func (controller *Controller) setHandlerForEachCommand() {
 
 func (controller *Controller) setHandlerForEachResponse() {
 	controller.responsesHandlers = handler.ResponsesHandlersMap{
-		shared.NewClientNotificationName:  controller.handler.NewClientResponseHandler,
-		shared.NewMessageNotificationName: controller.handler.NewMessageReceivedHandler,
-		shared.SendMessageActionName:      controller.handler.SendMessageInChatResponse,
+		dto.NewClientNotificationName:  controller.handler.NewClientResponseHandler,
+		dto.NewMessageNotificationName: controller.handler.NewMessageReceivedHandler,
+		dto.SendMessageActionName:      controller.handler.SendMessageInChatResponse,
 	}
 }
 
@@ -90,7 +90,7 @@ func (controller *Controller) findHandlerAndRun(command string) {
 	handler()
 }
 
-func (controller *Controller) HandleResponse(response shared.Response) {
+func (controller *Controller) HandleResponse(response dto.Response) {
 	if response.Err && response.Name == "unknown" {
 		log.Fatalf("error name: %s - msg: %s", response.Name, response.Payload)
 		controller.handler.CUI().DrawNewLineForInternalError()

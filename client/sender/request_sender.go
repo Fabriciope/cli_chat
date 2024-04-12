@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net"
 
-	"github.com/Fabriciope/cli_chat/pkg/shared"
+	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
 
 type requestSender struct {
@@ -15,7 +15,7 @@ func NewRequestSender(conn *net.TCPConn) *requestSender {
 	return &requestSender{connection: conn}
 }
 
-func (sender *requestSender) SendRequest(request shared.Request) error {
+func (sender *requestSender) SendRequest(request dto.Request) error {
 	requestJson, err := json.Marshal(request)
 	if err != nil {
 		return err

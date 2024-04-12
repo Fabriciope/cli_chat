@@ -13,7 +13,7 @@ import (
 	"github.com/Fabriciope/cli_chat/client/cui"
 	"github.com/Fabriciope/cli_chat/client/interfaces"
 	"github.com/Fabriciope/cli_chat/pkg/escapecode"
-	"github.com/Fabriciope/cli_chat/pkg/shared"
+	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
 
 // TODO: colocar como variaveis globais no container
@@ -33,7 +33,6 @@ type User struct {
 	loggedIn     bool
 }
 
-// TODO: recever cui como parametro como interface
 func NewUser(cui interfaces.CUI) (*User, error) {
 	remoteAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", remoteIp, remotePort))
 	//localAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", localIp, localPort))
@@ -91,7 +90,6 @@ func (user *User) listenToServer() {
 		var buf = make([]byte, 1024)
 		n, err := user.connection.Read(buf)
 		if err != nil {
-			// TODO: tirar o parametro chatLine como um ponteiro no cui
 			// TODO: tira o Info field do chatline e deixar somento o timestamp
 			user.CUI().DrawLineAndExit(1, cui.ChatLine{
 				Info:      "[insert time]",
@@ -100,7 +98,7 @@ func (user *User) listenToServer() {
 			})
 		}
 
-		var responseFromServer shared.Response
+		var responseFromServer dto.Response
 		if err = json.Unmarshal(buf[:n], &responseFromServer); err != nil {
 			return
 		}
@@ -126,7 +124,7 @@ func (user *User) listenToInput() {
 	}
 }
 
-func (user *User) AwaitResponseFromServer() (responseFromServer shared.Response, err error) {
+func (user *User) AwaitResponseFromServer() (responseFromServer dto.Response, err error) {
 	var buf = make([]byte, 1024)
 	n, err := user.connection.Read(buf)
 	if err != nil {
