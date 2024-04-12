@@ -23,6 +23,7 @@ func (handler *Handler) SendMessageInChat(message string) {
 	err := handler.sender.SendRequest(request)
 	if err != nil {
 		handler.CUI().DrawNewLineForInternalError(err.Error())
+		return
 	}
 
 	handler.CUI().DrawNewLineInChat(&cui.ChatLine{

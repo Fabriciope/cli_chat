@@ -54,7 +54,7 @@ func (controller *Controller) commandHandler(command string) (handler.CommandHan
 
 func (controller *Controller) responseHandler(actionName string) (handler.ResponseHandler, error) {
 	handler, exists := (*controller).responsesHandlers[actionName]
-	if exists != false {
+	if exists == false {
 		return nil, errors.New("handler for this action name does not exists")
 	}
 
@@ -91,7 +91,7 @@ func (controller *Controller) findHandlerAndRun(command string) {
 
 func (controller *Controller) HandleResponse(response dto.Response) {
 	// TODO: criar action name desconhecido
-	if response.Err && response.Name == "unknown" {
+	if response.Err && response.Name == "unknown" { // TODO: verificar o erro da response rem o name unknow
 		controller.handler.CUI().DrawNewLineForInternalError(response.Payload.(string))
 		return
 	}
