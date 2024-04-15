@@ -29,12 +29,13 @@ func (handler *ResponseHandler) LoginResponse(response dto.Response) {
 	}
 
 	*handler.userLoggedIn = true
-	handler.cui.SetLoggedAs(true)
+	handler.cui.DrawChatInterface()
 	handler.cui.DrawNewLineInChat(&cui.ChatLine{
 		Info:      "[insert time] login status:",
 		InfoColor: escapecode.BrightGreen,
 		Text:      response.Payload.(string),
 	})
+
 	// TODO: tirar o gerecianmento do troca de interface do cui para a interface
 }
 

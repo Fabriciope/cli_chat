@@ -28,7 +28,7 @@ type User struct {
 	inputScanner *bufio.Scanner
 	controller   *controller.Controller
 	cui          cui.CUIInterface
-	loggedIn     *bool
+	loggedIn     *bool // TODO: pensar em usar mutex ao alterar e acessar user.loggedIn
 }
 
 func NewUser(cui cui.CUIInterface) (*User, error) {

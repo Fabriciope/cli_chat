@@ -4,7 +4,10 @@ package cui
 // TODO: trocar os nomes que printam mensagem na tela de draw para print
 type CUIInterface interface {
 	InitConsoleUserInterface()
-	SetLoggedAs(bool) // TODO: trocar nome do metodo para setUserLoggedInAs
+	DrawLoginInterface()
+	DrawChatInterface()
+	CurrentInterface() ConsoleInterface
+	//SetLoggedAs(bool) // TODO: trocar nome do metodo para setUserLoggedInAs
 	DrawNewLineInChat(*ChatLine)
 	RedrawTypingBox()
 	DrawLoginError(string)
@@ -12,4 +15,5 @@ type CUIInterface interface {
 	// TODO: mandar os erros internos para um arquivo de log e criar um package logger para fazer isso
 	// TODO: pensar em trocar o campo logged para *bool
 	DrawNewLineForInternalError(string)
+	PrintLine(Line)
 }

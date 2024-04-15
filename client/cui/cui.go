@@ -25,11 +25,13 @@ var cliChatText = [10]string{
 
 const cliChatTextWidth = 54
 
-var interfaces = [2]string{"login", "chat"}
+type ConsoleInterface string
+
+var Interfaces = [2]ConsoleInterface{"login", "chat"}
 
 const (
-	login = iota
-	chat
+	Login = iota
+	Chat
 )
 
 type CUI struct {
@@ -41,11 +43,11 @@ type CUI struct {
 	xCoordinateToTypeLogin int16
 	sizeListener           *tsize.SizeListener
 
-	currentInterface string
-	logged           chan bool
+	currentInterface ConsoleInterface
 	chatLines        []*ChatLine
 }
 
+// TODO: rever logica de capturar o login e deixar que os handlers digam quando mudar de interface
 func NewCUI() (*CUI, error) {
 	var size, err = tsize.GetSize()
 	if err != nil {
@@ -66,26 +68,24 @@ func NewCUI() (*CUI, error) {
 		xCoordinateToTypeLogin: 10,
 		typingBoxHeight:        typingBoxHeight,
 		sizeListener:           listener,
-		currentInterface:       interfaces[login],
-		logged:                 make(chan bool),
+		currentInterface:       Interfaces[Login],
 		chatLines:              make([]*ChatLine, 0),
 	}
 
 	return cui, nil
 }
 
-func (cui *CUI) SetLoggedAs(logged bool) {
-	cui.logged <- logged
+func (cui *CUI) setCurrentInterface(currentInterface ConsoleInterface) {
+	cui.currentInterface = currentInterface
+}
+
+func (cui *CUI) CurrentInterface() ConsoleInterface {
+	return cui.currentInterface
 }
 
 func (cui *CUI) InitConsoleUserInterface() {
-	cui.drawLoginInterface()
+	cui.DrawLoginInterface()
 	go cui.listenToConsoleSize()
-
-	if logged := <-cui.logged; logged {
-		cui.currentInterface = interfaces[chat]
-		cui.drawChatInterface()
-	}
 }
 
 func (cui *CUI) listenToConsoleSize() {
@@ -106,14 +106,14 @@ func (cui *CUI) updateMeasures(newSize tsize.Size) {
 func (cui *CUI) adaptNewConsoleSize() {
 	switch cui.currentInterface {
 	case "login":
-		cui.drawLoginInterface()
+		cui.DrawLoginInterface()
 	case "chat":
-		cui.drawChatInterface()
+		cui.DrawChatInterface()
 		cui.adaptChatLinesOnTerminal()
 	}
 }
 
-func (cui *CUI) drawLoginInterface() {
+func (cui *CUI) DrawLoginInterface() {
 	designer := newConsoleDesigner()
 	designer.clearTerminal()
 
@@ -132,10 +132,12 @@ func (cui *CUI) drawLoginInterface() {
 			x: cui.xCoordinateToTypeLogin, y: startOfLoginBox + 3,
 		})
 
-	cui.currentInterface = interfaces[login]
+	cui.currentInterface = Interfaces[Login]
 }
 
 func (cui *CUI) DrawLoginError(message string) {
+	defer cui.setCurrentInterface(Interfaces[Login])
+
 	designer := newConsoleDesigner()
 	startOfError := cui.xCoordinateToTypeLogin + 2
 
@@ -158,7 +160,9 @@ func (cui *CUI) DrawLoginError(message string) {
 }
 
 // TODO: exibir os comandos disponiveis
-func (cui *CUI) drawChatInterface() {
+func (cui *CUI) DrawChatInterface() {
+	defer cui.setCurrentInterface(Interfaces[Chat])
+
 	designer := newConsoleDesigner()
 	designer.clearTerminal()
 	defer cui.moveCursorToTypeInChat(designer)
@@ -238,6 +242,10 @@ func (cui *CUI) typingBoxToSlice() (typingBox []string) {
 	}
 
 	return
+}
+
+func (cui *CUI) PrintLine(line Line) {
+	//  TODO: printar de acordo com a interface atual
 }
 
 func (cui *CUI) DrawNewLineInChat(line *ChatLine) {
