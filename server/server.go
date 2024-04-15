@@ -75,14 +75,30 @@ func (server *Server) clientHandler(ctx context.Context) {
 		var buf [1024]byte
 		bufSize, err := conn.Read(buf[0:])
 		if err != nil {
-			client, _ := server.userByRemoteAddr(conn.RemoteAddr().String())
+			client, err := server.userByRemoteAddr(conn.RemoteAddr().String())
+
+			if err != nil {
+				errMsg := fmt.Sprintf("server disconnected from client: %s", conn.RemoteAddr().String())
+				sender.sendMessage(conn, dto.Response{
+					Name:    dto.LogoutActionName,
+					Err:     false,
+					Payload: errMsg,
+				})
+				log.Printf(errMsg)
+
+				return
+			}
+
 			username := client.username
+			errMsg := fmt.Sprintf("%s disconnected from the chat", username)
 			server.removeClient(conn.RemoteAddr().String())
 			sender.sendMessage(conn, dto.Response{
 				Name:    dto.LogoutActionName,
 				Err:     false,
-				Payload: fmt.Sprintf("%s disconnected from the chat", username),
+				Payload: errMsg,
 			})
+			log.Println(errMsg)
+
 			return
 		}
 
