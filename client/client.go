@@ -9,9 +9,7 @@ import (
 	"strings"
 
 	"github.com/Fabriciope/cli_chat/client/controller"
-	"github.com/Fabriciope/cli_chat/client/controller/handler"
 	"github.com/Fabriciope/cli_chat/client/cui"
-	"github.com/Fabriciope/cli_chat/client/interfaces"
 	"github.com/Fabriciope/cli_chat/pkg/escapecode"
 	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
@@ -29,11 +27,11 @@ type User struct {
 	connection   *net.TCPConn
 	inputScanner *bufio.Scanner
 	controller   *controller.Controller
-	cui          interfaces.CUI
-	loggedIn     bool
+	cui          cui.CUIInterface
+	loggedIn     *bool
 }
 
-func NewUser(cui interfaces.CUI) (*User, error) {
+func NewUser(cui cui.CUIInterface) (*User, error) {
 	remoteAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", remoteIp, remotePort))
 	//localAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", localIp, localPort))
 	conn, err := net.DialTCP("tcp", nil, remoteAddr)
@@ -41,15 +39,14 @@ func NewUser(cui interfaces.CUI) (*User, error) {
 		return nil, err
 	}
 
-	myUser := &User{
+	loggedIn := false
+	return &User{
 		connection:   conn,
 		inputScanner: bufio.NewScanner(os.Stdin),
+		controller:   controller.NewController(conn, cui, &loggedIn),
 		cui:          cui,
-		loggedIn:     false,
-	}
-	myUser.controller = controller.NewController(handler.NewHandler(myUser))
-
-	return myUser, nil
+		loggedIn:     &loggedIn,
+	}, nil
 }
 
 func (user *User) CloseConnection() error {
@@ -59,7 +56,7 @@ func (user *User) CloseConnection() error {
 func (user *User) InitChat() {
 	defer user.CloseConnection()
 
-	go user.CUI().InitConsoleUserInterface()
+	go user.cui.InitConsoleUserInterface()
 
 	user.login()
 
@@ -71,13 +68,21 @@ func (user *User) login() {
 	for user.inputScanner.Scan() {
 		username := strings.Trim(user.inputScanner.Text(), " ")
 		if username == "" {
-			user.CUI().DrawLoginError("invalid username!")
+			user.cui.DrawLoginError("empty username")
 			continue
 		}
 
-		err := user.controller.LoginHandler()(username)
+		loginWithCommand := ":login " + username
+		user.controller.HandleInput(loginWithCommand)
+
+		response, err := user.awaitResponseFromServer()
 		if err != nil {
-			user.CUI().DrawLoginError(err.Error() + ", try again.")
+			user.cui.DrawLoginError(err.Error())
+			continue
+		}
+
+		user.controller.HandleResponse(response)
+		if !*user.loggedIn {
 			continue
 		}
 
@@ -91,7 +96,7 @@ func (user *User) listenToServer() {
 		n, err := user.connection.Read(buf)
 		if err != nil {
 			// TODO: tira o Info field do chatline e deixar somento o timestamp
-			user.CUI().DrawLineAndExit(1, cui.ChatLine{
+			user.cui.DrawLineAndExit(1, cui.ChatLine{
 				Info:      "[insert time]",
 				InfoColor: escapecode.Red,
 				Text:      "connection to the server was lost",
@@ -115,16 +120,16 @@ func (user *User) listenToInput() {
 
 		input := strings.Trim(user.inputScanner.Text(), " ")
 		if input == "" {
-			user.CUI().RedrawTypingBox()
+			user.cui.RedrawTypingBox()
 			continue
 		}
 
 		user.controller.HandleInput(input)
-		user.CUI().RedrawTypingBox()
+		user.cui.RedrawTypingBox()
 	}
 }
 
-func (user *User) AwaitResponseFromServer() (responseFromServer dto.Response, err error) {
+func (user *User) awaitResponseFromServer() (responseFromServer dto.Response, err error) {
 	var buf = make([]byte, 1024)
 	n, err := user.connection.Read(buf)
 	if err != nil {
@@ -136,21 +141,4 @@ func (user *User) AwaitResponseFromServer() (responseFromServer dto.Response, er
 	}
 
 	return
-}
-
-func (user *User) Conn() *net.TCPConn {
-	return user.connection
-}
-
-func (user *User) CUI() interfaces.CUI {
-	return user.cui
-}
-
-func (user *User) LoggedIn() bool {
-	return user.loggedIn
-}
-
-func (user *User) SetLoggedInAs(logged bool) {
-	user.loggedIn = logged
-	user.CUI().SetLoggedAs(true)
 }

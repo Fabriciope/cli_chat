@@ -2,25 +2,41 @@ package controller
 
 import (
 	"errors"
+	"fmt"
+	"net"
 	"strings"
 
-	"github.com/Fabriciope/cli_chat/client/controller/handler"
+	"github.com/Fabriciope/cli_chat/client/controller/inputhandler"
+	"github.com/Fabriciope/cli_chat/client/controller/responsehandler"
 	"github.com/Fabriciope/cli_chat/client/cui"
 	"github.com/Fabriciope/cli_chat/pkg/escapecode"
 	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
 
+type CommandHandler func(string)
+type CommandsHandlersMap map[string]CommandHandler
+type ResponseHandler func(dto.Response)
+type ResponsesHandlersMap map[string]ResponseHandler
+
 type Controller struct {
-	commandsHandlers  handler.CommandsHandlersMap
-	responsesHandlers handler.ResponsesHandlersMap
-	handler           *handler.Handler
+	commandsHandlers  CommandsHandlersMap
+	responsesHandlers ResponsesHandlersMap
+	inputHandler      *inputhandler.InputHandler
+	responseHandler   *responsehandler.ResponseHandler
+	cui               cui.CUIInterface
+	userLoggedIn      *bool
 }
 
-func NewController(h *handler.Handler) *Controller {
+func NewController(conn *net.TCPConn, cui cui.CUIInterface, loggedIn *bool) *Controller {
+	inputHandler := inputhandler.NewInputHandler(conn, cui, loggedIn)
+	responseHandler := responsehandler.NewResponseHandler(cui, loggedIn)
 	controller := &Controller{
-		commandsHandlers:  make(handler.CommandsHandlersMap),
-		responsesHandlers: make(handler.ResponsesHandlersMap),
-		handler:           h,
+		commandsHandlers:  make(CommandsHandlersMap),
+		responsesHandlers: make(ResponsesHandlersMap),
+		inputHandler:      inputHandler,
+		responseHandler:   responseHandler,
+		cui:               cui,
+		userLoggedIn:      loggedIn,
 	}
 
 	controller.setHandlerForEachCommand()
@@ -30,75 +46,82 @@ func NewController(h *handler.Handler) *Controller {
 }
 
 func (controller *Controller) setHandlerForEachCommand() {
-	controller.commandsHandlers = handler.CommandsHandlersMap{
-		// TODO: add comands and handler
+	controller.commandsHandlers = CommandsHandlersMap{
+		":login": controller.inputHandler.Login,
 	}
 }
 
 func (controller *Controller) setHandlerForEachResponse() {
-	controller.responsesHandlers = handler.ResponsesHandlersMap{
-		dto.NewClientNotificationName:  controller.handler.NewClientResponseHandler,
-		dto.NewMessageNotificationName: controller.handler.NewMessageReceivedHandler,
-		dto.SendMessageActionName:      controller.handler.SendMessageInChatResponse,
+	controller.responsesHandlers = ResponsesHandlersMap{
+		dto.LoginActionName:            controller.responseHandler.LoginResponse,
+		dto.NewClientNotificationName:  controller.responseHandler.NewClient,
+		dto.SendMessageActionName:      controller.responseHandler.SendMessageInChatResponse,
+		dto.NewMessageNotificationName: controller.responseHandler.NewMessageReceived,
+		// TODO: fazer o logout
 	}
 }
 
-func (controller *Controller) commandHandler(command string) (handler.CommandHandler, error) {
+func (controller *Controller) getCommandHandler(command string) (CommandHandler, error) {
 	handler, exists := (*controller).commandsHandlers[command]
-	if exists != false {
-		return nil, errors.New("handler for this command does not exist")
+	if exists == false {
+		return nil, errors.New("input handler for this command does not exist")
 	}
 
 	return handler, nil
 }
 
-func (controller *Controller) responseHandler(actionName string) (handler.ResponseHandler, error) {
+func (controller *Controller) getResponseHandler(actionName string) (ResponseHandler, error) {
 	handler, exists := (*controller).responsesHandlers[actionName]
 	if exists == false {
-		return nil, errors.New("handler for this action name does not exists")
+		return nil, errors.New("response handler for this action name does not exists")
 	}
 
 	return handler, nil
 }
 
-func (controller *Controller) LoginHandler() func(string) error {
-	return controller.handler.LoginHandler
-}
-
+// TODO: estudar como implementar midleware
 func (controller *Controller) HandleInput(input string) {
 	input = strings.Trim(input, " ")
 
 	if strings.HasPrefix(input, ":") {
-		controller.findHandlerAndRun(input)
+		inputSplitted := strings.Split(input, " ")
+		handler, err := controller.getCommandHandler(inputSplitted[0])
+		if err != nil {
+			// TODO: fazer com que o pacote cui desenhe a linha de acordo com estado do usuario
+			errorMessage := fmt.Sprintf("%s command does not exist", inputSplitted[0])
+			if *controller.userLoggedIn {
+				controller.cui.DrawNewLineInChat(&cui.ChatLine{
+					Info:      "[insert time]",
+					InfoColor: escapecode.BrightYellow,
+					Text:      errorMessage,
+				})
+			} else {
+				controller.cui.DrawLoginError(errorMessage)
+			}
+
+			return
+		}
+
+		handler(strings.Join(inputSplitted[1:], " ")) // TODO: ou usar o trimPrefix com inputSplitted[0]
 		return
 	}
 
-	controller.handler.SendMessageInChat(input)
-}
-
-func (controller *Controller) findHandlerAndRun(command string) {
-	handler, err := controller.commandHandler(command)
-	if err != nil {
-		controller.handler.CUI().DrawNewLineInChat(&cui.ChatLine{
-			Info:      "[insert time]",
-			InfoColor: escapecode.Yellow,
-			Text:      "this command does not exists",
-		})
+	if input == "" {
+		// TODO: print error
 	}
-
-	handler()
+	controller.inputHandler.SendMessageInChat(input)
 }
 
 func (controller *Controller) HandleResponse(response dto.Response) {
 	// TODO: criar action name desconhecido
 	if response.Err && response.Name == "unknown" { // TODO: verificar o erro da response rem o name unknow
-		controller.handler.CUI().DrawNewLineForInternalError(response.Payload.(string))
+		controller.cui.DrawNewLineForInternalError(response.Payload.(string))
 		return
 	}
 
-	handler, err := controller.responseHandler(response.Name)
+	handler, err := controller.getResponseHandler(response.Name)
 	if err != nil {
-		controller.handler.CUI().DrawNewLineForInternalError(err.Error())
+		controller.cui.DrawNewLineForInternalError(err.Error())
 		return
 	}
 
