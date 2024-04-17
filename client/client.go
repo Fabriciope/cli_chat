@@ -28,7 +28,7 @@ type User struct {
 	inputScanner *bufio.Scanner
 	controller   *controller.Controller
 	cui          cui.CUIInterface
-	loggedIn     *bool // TODO: pensar em usar mutex ao alterar e acessar user.loggedIn
+	loggedIn     *bool
 }
 
 func NewUser(cui cui.CUIInterface) (*User, error) {
@@ -56,16 +56,11 @@ func (user *User) CloseConnection() error {
 func (user *User) InitChat() {
 	defer user.CloseConnection()
 
-	go user.cui.InitConsoleUserInterface()
-
-	// TODO: colocar a logica de fazer o login para o main.go
-	user.login()
-
 	go user.listenToServer()
 	user.listenToInput()
 }
 
-func (user *User) login() {
+func (user *User) Login() {
 	for user.inputScanner.Scan() {
 		username := strings.Trim(user.inputScanner.Text(), " ")
 		if username == "" {

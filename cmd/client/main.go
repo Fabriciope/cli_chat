@@ -28,5 +28,7 @@ func main() {
 		return
 	}
 
-	user.InitChat() // TODO: colorcar instrucao dentro de um log para verificar os errors
+	go userInterface.InitConsoleUserInterface()
+	user.Login()
+	user.InitChat()
 }
