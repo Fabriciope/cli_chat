@@ -7,9 +7,8 @@ import (
 	"github.com/Fabriciope/cli_chat/pkg/escapecode"
 )
 
-// TODO: criar variavies de erro
-
 type consoleDesigner struct {
+	// TODO: implementar backgroundColor
 	drawingColor escapecode.ColorCode
 	cursorColor  escapecode.ColorCode
 
@@ -27,13 +26,17 @@ func newConsoleDesigner() *consoleDesigner {
 }
 
 func (designer *consoleDesigner) setColor(drawingColor escapecode.ColorCode) *consoleDesigner {
-	designer.drawingColor = drawingColor
+	if drawingColor != "" {
+		designer.drawingColor = drawingColor
+	}
 
 	return designer
 }
 
 func (designer *consoleDesigner) setCursorColor(cursorColor escapecode.ColorCode) *consoleDesigner {
-	designer.cursorColor = cursorColor
+	if cursorColor != "" {
+		designer.cursorColor = cursorColor
+	}
 
 	return designer
 }

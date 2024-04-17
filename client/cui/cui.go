@@ -7,9 +7,11 @@ import (
 	"time"
 
 	"github.com/Fabriciope/cli_chat/pkg/escapecode"
+	"github.com/acarl005/stripansi"
 	tsize "github.com/kopoli/go-terminal-size"
 )
 
+// TODO: trocar o nome da variavel para loginInterfaceText
 var cliChatText = [10]string{
 	`░█████╗░██╗░░░░░██╗  ░█████╗░██╗░░██╗░█████╗░████████╗`,
 	`██╔══██╗██║░░░░░██║  ██╔══██╗██║░░██║██╔══██╗╚══██╔══╝`,
@@ -44,10 +46,9 @@ type CUI struct {
 	sizeListener           *tsize.SizeListener
 
 	currentInterface ConsoleInterface
-	chatLines        []*ChatLine
+	chatLines        []*Line
 }
 
-// TODO: rever logica de capturar o login e deixar que os handlers digam quando mudar de interface
 func NewCUI() (*CUI, error) {
 	var size, err = tsize.GetSize()
 	if err != nil {
@@ -69,7 +70,7 @@ func NewCUI() (*CUI, error) {
 		typingBoxHeight:        typingBoxHeight,
 		sizeListener:           listener,
 		currentInterface:       Interfaces[Login],
-		chatLines:              make([]*ChatLine, 0),
+		chatLines:              make([]*Line, 0),
 	}
 
 	return cui, nil
@@ -84,7 +85,7 @@ func (cui *CUI) CurrentInterface() ConsoleInterface {
 }
 
 func (cui *CUI) InitConsoleUserInterface() {
-	cui.DrawLoginInterface()
+	cui.RenderLoginInterface()
 	go cui.listenToConsoleSize()
 }
 
@@ -105,15 +106,15 @@ func (cui *CUI) updateMeasures(newSize tsize.Size) {
 
 func (cui *CUI) adaptNewConsoleSize() {
 	switch cui.currentInterface {
-	case "login":
-		cui.DrawLoginInterface()
-	case "chat":
-		cui.DrawChatInterface()
+	case Interfaces[Login]:
+		cui.RenderLoginInterface()
+	case Interfaces[Chat]:
+		cui.RenderChatInterface()
 		cui.adaptChatLinesOnTerminal()
 	}
 }
 
-func (cui *CUI) DrawLoginInterface() {
+func (cui *CUI) RenderLoginInterface() {
 	designer := newConsoleDesigner()
 	designer.clearTerminal()
 
@@ -135,7 +136,8 @@ func (cui *CUI) DrawLoginInterface() {
 	cui.currentInterface = Interfaces[Login]
 }
 
-func (cui *CUI) DrawLoginError(message string) {
+// TODO: limpar erro e nome anterior
+func (cui *CUI) PrintMessageInLoginInterface(message string, color escapecode.ColorCode) {
 	defer cui.setCurrentInterface(Interfaces[Login])
 
 	designer := newConsoleDesigner()
@@ -149,7 +151,7 @@ func (cui *CUI) DrawLoginError(message string) {
 
 	startOfCliChatText := int16(cui.consoleWidth/2) - int16(cliChatTextWidth/2)
 	designer.moveCursor(coordinates{x: startOfError, y: startOfCliChatText + 15})
-	designer.setDrawing(message).setColor(escapecode.Red).printAndResetColors()
+	designer.setDrawing(message).setColor(color).printAndResetColors()
 
 	startOfLoginBox := startOfCliChatText + 13
 	designer.
@@ -160,7 +162,7 @@ func (cui *CUI) DrawLoginError(message string) {
 }
 
 // TODO: exibir os comandos disponiveis
-func (cui *CUI) DrawChatInterface() {
+func (cui *CUI) RenderChatInterface() {
 	defer cui.setCurrentInterface(Interfaces[Chat])
 
 	designer := newConsoleDesigner()
@@ -244,25 +246,26 @@ func (cui *CUI) typingBoxToSlice() (typingBox []string) {
 	return
 }
 
-func (cui *CUI) PrintLine(line Line) {
-	//  TODO: printar de acordo com a interface atual
+func (cui *CUI) PrintLine(line *Line) {
+	switch cui.CurrentInterface() {
+	case Interfaces[Login]:
+		cui.PrintMessageInLoginInterface((*line).Text, (*line).InfoColor)
+	case Interfaces[Chat]:
+		cui.addChatLine(line)
+		cui.printChatLines()
+	}
 }
 
-func (cui *CUI) DrawNewLineInChat(line *ChatLine) {
-	cui.addChatLine(line)
-	cui.drawChatLines()
-}
-
-func (cui *CUI) DrawNewLineForInternalError(message string) {
-	cui.addChatLine(&ChatLine{
-		Info:      "[insert time] internal error:",
+func (cui *CUI) PrintLineForInternalError(message string) {
+	cui.PrintLine(&Line{
+		Info:      "internal error:",
 		InfoColor: escapecode.Red,
 		Text:      message,
+		TextColor: escapecode.Yellow,
 	})
-	cui.drawChatLines()
 }
 
-func (cui *CUI) addChatLine(line *ChatLine) {
+func (cui *CUI) addChatLine(line *Line) {
 	cui.chatLines = append(cui.chatLines, line)
 	cui.checkIfChatLinesExceededTheLimit()
 }
@@ -275,19 +278,25 @@ func (cui *CUI) checkIfChatLinesExceededTheLimit() {
 	}
 }
 
-// TODO: tentar resolver problema quando a mensagem passa do limite da tela
-func (cui *CUI) drawChatLines() {
+func (cui *CUI) printChatLines() {
 	designer := newConsoleDesigner()
 	defer cui.moveCursorToTypeInChat(designer)
 
 	designer.setColor(escapecode.White)
-	for key, chatLine := range cui.chatLines {
+	for key, line := range cui.chatLines {
 		info := newConsoleDesigner().
-			setColor(chatLine.InfoColor).
-			setDrawing(chatLine.Info).
+			setColor(line.InfoColor).
+			setDrawing(line.Info). // TODO: trocar o nome de drawing para text
 			toStringWithResetColors()
-		lineText := info + " " + chatLine.Text
-		amountOfSpaces := (int(cui.consoleWidth) - 4) - len(chatLine.Info+" "+chatLine.Text)
+
+		text := newConsoleDesigner().
+			setColor(line.TextColor).
+			setDrawing(line.Text).
+			toStringWithResetColors()
+
+		lineText := info + " " + text
+		infoAndText := stripansi.Strip(line.Info + " " + line.Text)
+		amountOfSpaces := (int(cui.consoleWidth) - 4) - len(infoAndText)
 		if amountOfSpaces <= 0 {
 			amountOfSpaces = 0
 		}
@@ -295,7 +304,6 @@ func (cui *CUI) drawChatLines() {
 		lineStr := fmt.Sprintf(` │%s%s│ `, lineText, strings.Repeat(" ", amountOfSpaces))
 		designer.setCursorCoordinates(coordinates{x: int16(key + 2), y: 1})
 		designer.eraseLine()
-
 		designer.setDrawing(lineStr).printAndResetColors()
 	}
 }
@@ -312,18 +320,24 @@ func (cui *CUI) moveCursorToTypeInChat(designer *consoleDesigner) {
 
 func (cui *CUI) adaptChatLinesOnTerminal() {
 	cui.checkIfChatLinesExceededTheLimit()
-	cui.drawChatLines()
+	cui.printChatLines()
 }
 
-func (cui *CUI) DrawLineAndExit(code uint8, chatLine ChatLine) {
+func (cui *CUI) PrintLineAndExit(code uint8, line Line) {
 	designer := newConsoleDesigner()
 	designer.clearTerminal()
 
 	info := newConsoleDesigner().
-		setColor(chatLine.InfoColor).
-		setDrawing(chatLine.Info).
+		setColor(line.InfoColor).
+		setDrawing(line.Info).
 		toStringWithResetColors()
-	lineStr := info + " " + chatLine.Text
+
+	text := newConsoleDesigner().
+		setColor(line.TextColor).
+		setDrawing(line.Text).
+		toStringWithResetColors()
+
+	lineStr := info + " " + text
 	designer.
 		setCursorCoordinates(coordinates{
 			x: 1, y: 1,
@@ -333,7 +347,7 @@ func (cui *CUI) DrawLineAndExit(code uint8, chatLine ChatLine) {
 	os.Exit(int(code))
 }
 
-func (cui *CUI) drawLoading(length uint, color escapecode.ColorCode) error {
+func (cui *CUI) DrawLoading(length uint, color escapecode.ColorCode) error {
 	designer := newConsoleDesigner()
 	designer.setColor(color)
 

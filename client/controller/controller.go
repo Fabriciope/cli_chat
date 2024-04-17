@@ -87,17 +87,12 @@ func (controller *Controller) HandleInput(input string) {
 		inputSplitted := strings.Split(input, " ")
 		handler, err := controller.getCommandHandler(inputSplitted[0])
 		if err != nil {
-			// TODO: fazer com que o pacote cui desenhe a linha de acordo com estado do usuario
-			errorMessage := fmt.Sprintf("%s command does not exist", inputSplitted[0])
-			if *controller.userLoggedIn {
-				controller.cui.DrawNewLineInChat(&cui.ChatLine{
-					Info:      "[insert time]",
-					InfoColor: escapecode.BrightYellow,
-					Text:      errorMessage,
-				})
-			} else {
-				controller.cui.DrawLoginError(errorMessage)
-			}
+			controller.cui.PrintLine(&cui.Line{
+				Info:      "error:",
+				InfoColor: escapecode.BrightYellow,
+				Text:      fmt.Sprintf("%s command does not exist", inputSplitted[0]),
+				TextColor: escapecode.Yellow,
+			})
 
 			return
 		}
@@ -115,13 +110,13 @@ func (controller *Controller) HandleInput(input string) {
 func (controller *Controller) HandleResponse(response dto.Response) {
 	// TODO: criar action name desconhecido
 	if response.Err && response.Name == "unknown" { // TODO: verificar o erro da response rem o name unknow
-		controller.cui.DrawNewLineForInternalError(response.Payload.(string))
+		controller.cui.PrintLineForInternalError(response.Payload.(string))
 		return
 	}
 
 	handler, err := controller.getResponseHandler(response.Name)
 	if err != nil {
-		controller.cui.DrawNewLineForInternalError(err.Error())
+		controller.cui.PrintLineForInternalError(err.Error())
 		return
 	}
 

@@ -1,19 +1,15 @@
 package cui
 
-// TODO: tirar o metodo de desenhar DrawLoginError e DrawNewLineInChat e fazer so uma e deixar que o cui entenda se o usuario esta logado ou nao
-// TODO: trocar os nomes que printam mensagem na tela de draw para print
+import "github.com/Fabriciope/cli_chat/pkg/escapecode"
+
 type CUIInterface interface {
 	InitConsoleUserInterface()
-	DrawLoginInterface()
-	DrawChatInterface()
+	RenderLoginInterface()
+	RenderChatInterface()
 	CurrentInterface() ConsoleInterface
-	//SetLoggedAs(bool) // TODO: trocar nome do metodo para setUserLoggedInAs
-	DrawNewLineInChat(*ChatLine)
 	RedrawTypingBox()
-	DrawLoginError(string)
-	DrawLineAndExit(uint8, ChatLine)
-	// TODO: mandar os erros internos para um arquivo de log e criar um package logger para fazer isso
-	// TODO: pensar em trocar o campo logged para *bool
-	DrawNewLineForInternalError(string)
-	PrintLine(Line)
+	PrintLine(*Line)
+	PrintMessageInLoginInterface(string, escapecode.ColorCode)
+	PrintLineForInternalError(string) // TODO: mandar os erros internos para um arquivo de log e criar um package logger para fazer isso
+	PrintLineAndExit(uint8, Line)
 }

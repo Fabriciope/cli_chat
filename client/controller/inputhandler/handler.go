@@ -27,26 +27,28 @@ func NewInputHandler(conn *net.TCPConn, cui cui.CUIInterface, loggedIn *bool) *I
 
 func (handler *InputHandler) Login(username string) {
 	if username == "" {
-		handler.cui.DrawLoginError("write something")
-		return
+		handler.cui.PrintMessageInLoginInterface("empty username", escapecode.BrightYellow)
 	}
 
 	// TODO: verificar se o usuario ja esta logado
 	request := dto.Request{Name: dto.LoginActionName, Payload: username}
 	err := handler.sender.SendRequest(request)
 	if err != nil {
-		handler.cui.DrawNewLineForInternalError(err.Error())
+		handler.cui.PrintLineForInternalError(err.Error())
 		return
 	}
 }
 
 func (handler *InputHandler) SendMessageInChat(message string) {
 	if !*handler.userLoggedIn {
-		handler.cui.DrawNewLineInChat(&cui.ChatLine{
-			Info:      "[insert time] Me:",
-			InfoColor: escapecode.Yellow,
-			Text:      "you must be logged in to send messages in chat",
-		})
+		handler.cui.PrintLine(
+			cui.MakeLine(&cui.Line{
+				Info:      "warning:",
+				InfoColor: escapecode.BrightYellow,
+				Text:      "you must be logged in to send messages in chat",
+				TextColor: escapecode.Yellow,
+			}))
+
 		return
 	}
 
@@ -56,13 +58,14 @@ func (handler *InputHandler) SendMessageInChat(message string) {
 	}
 	err := handler.sender.SendRequest(request)
 	if err != nil {
-		handler.cui.DrawNewLineForInternalError(err.Error())
+		handler.cui.PrintLineForInternalError(err.Error())
 		return
 	}
 
-	handler.cui.DrawNewLineInChat(&cui.ChatLine{
-		Info:      "[insert time] Me:",
-		InfoColor: escapecode.Yellow,
-		Text:      message,
-	})
+	handler.cui.PrintLine(
+		cui.MakeLine(&cui.Line{
+			Info:      escapecode.TextToBold("me:"),
+			InfoColor: escapecode.DefaultColor,
+			Text:      message,
+		}))
 }

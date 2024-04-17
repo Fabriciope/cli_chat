@@ -18,12 +18,15 @@ func main() {
 
 	user, err := client.NewUser(userInterface)
 	if err != nil {
-		userInterface.DrawLineAndExit(1, cui.ChatLine{
-			Info:      "[insert time]",
+		userInterface.PrintLineAndExit(1, cui.Line{
+			Info:      "error creating client:",
 			InfoColor: escapecode.Red,
 			Text:      err.Error(),
+			TextColor: escapecode.Yellow,
 		})
+
+		return
 	}
 
-	user.InitChat()
+	user.InitChat() // TODO: colorcar instrucao dentro de um log para verificar os errors
 }

@@ -68,7 +68,7 @@ func (user *User) login() {
 	for user.inputScanner.Scan() {
 		username := strings.Trim(user.inputScanner.Text(), " ")
 		if username == "" {
-			user.cui.DrawLoginError("empty username")
+			user.cui.PrintMessageInLoginInterface("empty username", escapecode.BrightYellow)
 			continue
 		}
 
@@ -77,7 +77,7 @@ func (user *User) login() {
 
 		response, err := user.awaitResponseFromServer()
 		if err != nil {
-			user.cui.DrawLoginError(err.Error())
+			user.cui.PrintLineForInternalError(err.Error())
 			continue
 		}
 
@@ -96,10 +96,11 @@ func (user *User) listenToServer() {
 		n, err := user.connection.Read(buf)
 		if err != nil {
 			// TODO: tira o Info field do chatline e deixar somento o timestamp
-			user.cui.DrawLineAndExit(1, cui.ChatLine{
-				Info:      "[insert time]",
+			user.cui.PrintLineAndExit(1, cui.Line{
+				Info:      "error from server:",
 				InfoColor: escapecode.Red,
 				Text:      "connection to the server was lost",
+				TextColor: escapecode.Yellow,
 			})
 		}
 

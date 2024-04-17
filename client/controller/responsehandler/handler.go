@@ -2,7 +2,6 @@ package responsehandler
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/Fabriciope/cli_chat/client/cui"
@@ -24,46 +23,56 @@ func NewResponseHandler(cui cui.CUIInterface, loggedIn *bool) *ResponseHandler {
 
 func (handler *ResponseHandler) LoginResponse(response dto.Response) {
 	if response.Err {
-		handler.cui.DrawLoginError(response.Payload.(string))
+		handler.cui.PrintLine(
+			cui.MakeLine(&cui.Line{
+				Info:      "login status:",
+				InfoColor: escapecode.BrightYellow,
+				Text:      response.Payload.(string),
+				TextColor: escapecode.Yellow,
+			}))
+
 		return
 	}
 
 	*handler.userLoggedIn = true
-	handler.cui.DrawChatInterface()
-	handler.cui.DrawNewLineInChat(&cui.ChatLine{
-		Info:      "[insert time] login status:",
-		InfoColor: escapecode.BrightGreen,
-		Text:      response.Payload.(string),
-	})
-
-	// TODO: tirar o gerecianmento do troca de interface do cui para a interface
+	handler.cui.RenderChatInterface()
+	handler.cui.PrintLine(
+		cui.MakeLine(&cui.Line{
+			Info:      "login status:",
+			InfoColor: escapecode.BrightGreen,
+			Text:      response.Payload.(string),
+			TextColor: escapecode.Green, // TODO: testar sem co TextColor
+		}))
 }
 
 func (handler *ResponseHandler) NewMessageReceived(response dto.Response) {
 	var textMessage dto.TextMessage
 	json.Unmarshal([]byte(response.Payload.(string)), &textMessage)
-	handler.cui.DrawNewLineInChat(&cui.ChatLine{
-		// TODO: colocar o username em bold
-		Info:      fmt.Sprintf("[insert time] %s:", textMessage.Username),
-		InfoColor: textMessage.UserColor,
-		Text:      textMessage.Message,
-	})
+	handler.cui.PrintLine(
+		cui.MakeLine(&cui.Line{
+			Info:      escapecode.TextToBold(textMessage.Username + ":"),
+			InfoColor: textMessage.UserColor,
+			Text:      textMessage.Message,
+		}))
 }
 
 func (handler *ResponseHandler) NewClient(response dto.Response) {
-	handler.cui.DrawNewLineInChat(&cui.ChatLine{
-		Info:      "[insert time]",
-		InfoColor: escapecode.Green,
-		Text:      strings.Trim(response.Payload.(string), " "),
-	})
+	handler.cui.PrintLine(
+		cui.MakeLine(&cui.Line{
+			InfoColor: escapecode.BrightGreen,
+			Text:      strings.Trim(response.Payload.(string), " "),
+			TextColor: escapecode.Green,
+		}))
 }
 
 func (handler *ResponseHandler) SendMessageInChatResponse(response dto.Response) {
 	if response.Err {
-		handler.cui.DrawNewLineInChat(&cui.ChatLine{
-			Info:      "[insert time] ERROR FROM SERVER:",
-			InfoColor: escapecode.Red,
-			Text:      response.Payload.(string),
-		})
+		handler.cui.PrintLine(
+			cui.MakeLine(&cui.Line{
+				Info:      "ERROR FROM SERVER:",
+				InfoColor: escapecode.Red,
+				Text:      response.Payload.(string),
+				TextColor: escapecode.Yellow,
+			}))
 	}
 }
