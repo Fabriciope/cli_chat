@@ -22,15 +22,10 @@ func NewResponseHandler(cui cui.CUIInterface, loggedIn *bool) *ResponseHandler {
 }
 
 func (handler *ResponseHandler) LoginResponse(response dto.Response) {
-	if response.Err {
-		handler.cui.PrintLine(
-			cui.MakeLine(&cui.Line{
-				Info:      "login status:",
-				InfoColor: escapecode.BrightYellow,
-				Text:      response.Payload.(string),
-				TextColor: escapecode.Yellow,
-			}))
+	payload := response.Payload.(string)
 
+	if response.Err {
+		handler.cui.RedrawLoginInterfaceWithError(payload, escapecode.Red)
 		return
 	}
 

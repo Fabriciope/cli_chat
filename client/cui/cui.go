@@ -137,17 +137,13 @@ func (cui *CUI) RenderLoginInterface() {
 }
 
 // TODO: limpar erro e nome anterior
-func (cui *CUI) PrintMessageInLoginInterface(message string, color escapecode.ColorCode) {
+func (cui *CUI) RedrawLoginInterfaceWithError(message string, color escapecode.ColorCode) {
 	defer cui.setCurrentInterface(Interfaces[Login])
+
+	cui.RenderLoginInterface()
 
 	designer := newConsoleDesigner()
 	startOfError := cui.xCoordinateToTypeLogin + 2
-
-	// clear old error message
-	linesToClear := int16(cui.consoleHeight) - startOfError
-	for cLine := startOfError; cLine <= linesToClear; cLine++ {
-		designer.eraseLineWithXCoordinates(cLine)
-	}
 
 	startOfCliChatText := int16(cui.consoleWidth/2) - int16(cliChatTextWidth/2)
 	designer.moveCursor(coordinates{x: startOfError, y: startOfCliChatText + 15})
@@ -249,7 +245,7 @@ func (cui *CUI) typingBoxToSlice() (typingBox []string) {
 func (cui *CUI) PrintLine(line *Line) {
 	switch cui.CurrentInterface() {
 	case Interfaces[Login]:
-		cui.PrintMessageInLoginInterface((*line).Text, (*line).InfoColor)
+		cui.RedrawLoginInterfaceWithError((*line).Text, (*line).InfoColor)
 	case Interfaces[Chat]:
 		cui.addChatLine(line)
 		cui.printChatLines()

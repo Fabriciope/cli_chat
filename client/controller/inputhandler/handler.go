@@ -38,7 +38,7 @@ func (handler *InputHandler) Login(username string) {
 	}
 
 	if username == "" {
-		handler.cui.PrintMessageInLoginInterface("empty username", escapecode.Red)
+		handler.cui.RedrawLoginInterfaceWithError("empty username", escapecode.Red)
 		return
 	}
 
