@@ -1,6 +1,7 @@
 package dto
 
 const (
+	UnknownActionName          = "unknown"
 	LoginActionName            = "login"
 	LogoutActionName           = "logout"
 	GetUsersActionName         = "users"

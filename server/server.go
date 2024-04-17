@@ -106,7 +106,7 @@ func (server *Server) clientHandler(ctx context.Context) {
 
 		if err = json.Unmarshal(buf[:bufSize], &request); err != nil {
 			sender.sendMessage(conn, dto.Response{
-				Name:    "unknown",
+				Name:    dto.UnknownActionName,
 				Err:     true,
 				Payload: "Invalid request",
 			})
@@ -128,7 +128,7 @@ func (server *Server) handleRequest(ctx context.Context, request dto.Request) *d
 		}
 	}
 
-	return &dto.Response{Name: "unknown", Err: true, Payload: "Action name unknown"}
+	return &dto.Response{Name: dto.UnknownActionName, Err: true, Payload: "Action name unknown"}
 }
 
 func (server *Server) lock() {

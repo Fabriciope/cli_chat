@@ -97,19 +97,15 @@ func (controller *Controller) HandleInput(input string) {
 			return
 		}
 
-		handler(strings.Join(inputSplitted[1:], " ")) // TODO: ou usar o trimPrefix com inputSplitted[0]
+		handler(strings.Join(inputSplitted[1:], " ")) //ou usar o trimPrefix com inputSplitted[0]
 		return
 	}
 
-	if input == "" {
-		// TODO: print error
-	}
 	controller.inputHandler.SendMessageInChat(input)
 }
 
 func (controller *Controller) HandleResponse(response dto.Response) {
-	// TODO: criar action name desconhecido
-	if response.Err && response.Name == "unknown" { // TODO: verificar o erro da response rem o name unknow
+	if response.Err && response.Name == dto.UnknownActionName {
 		controller.cui.PrintLineForInternalError(response.Payload.(string))
 		return
 	}
