@@ -13,7 +13,6 @@ type Line struct {
 	TextColor escapecode.ColorCode
 }
 
-// TODO: testar na aplicacao
 func MakeLine(line *Line) *Line {
 	// TODO: implementar, pegar o tempo atual quando a struct Line for declarada
 	line.Info = strings.Trim("[insert time] "+line.Info, " ")

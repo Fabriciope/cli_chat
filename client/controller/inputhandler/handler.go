@@ -26,11 +26,22 @@ func NewInputHandler(conn *net.TCPConn, cui cui.CUIInterface, loggedIn *bool) *I
 }
 
 func (handler *InputHandler) Login(username string) {
-	if username == "" {
-		handler.cui.PrintMessageInLoginInterface("empty username", escapecode.BrightYellow)
+	if *handler.userLoggedIn {
+		handler.cui.PrintLine(
+			cui.MakeLine(&cui.Line{
+				Info:      "invalid operation:",
+				InfoColor: escapecode.Red,
+				Text:      "user is already logged in",
+				TextColor: escapecode.Red,
+			}))
+		return
 	}
 
-	// TODO: verificar se o usuario ja esta logado
+	if username == "" {
+		handler.cui.PrintMessageInLoginInterface("empty username", escapecode.Red)
+		return
+	}
+
 	request := dto.Request{Name: dto.LoginActionName, Payload: username}
 	err := handler.sender.SendRequest(request)
 	if err != nil {
@@ -52,10 +63,7 @@ func (handler *InputHandler) SendMessageInChat(message string) {
 		return
 	}
 
-	request := dto.Request{
-		Name:    dto.SendMessageActionName,
-		Payload: message,
-	}
+	request := dto.Request{Name: dto.SendMessageActionName, Payload: message}
 	err := handler.sender.SendRequest(request)
 	if err != nil {
 		handler.cui.PrintLineForInternalError(err.Error())

@@ -41,7 +41,7 @@ func (handler *ResponseHandler) LoginResponse(response dto.Response) {
 			Info:      "login status:",
 			InfoColor: escapecode.BrightGreen,
 			Text:      response.Payload.(string),
-			TextColor: escapecode.Green, // TODO: testar sem co TextColor
+			TextColor: escapecode.Green,
 		}))
 }
 

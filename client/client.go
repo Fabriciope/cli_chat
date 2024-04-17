@@ -58,6 +58,7 @@ func (user *User) InitChat() {
 
 	go user.cui.InitConsoleUserInterface()
 
+	// TODO: colocar a logica de fazer o login para o main.go
 	user.login()
 
 	go user.listenToServer()
@@ -68,7 +69,13 @@ func (user *User) login() {
 	for user.inputScanner.Scan() {
 		username := strings.Trim(user.inputScanner.Text(), " ")
 		if username == "" {
-			user.cui.PrintMessageInLoginInterface("empty username", escapecode.BrightYellow)
+			user.cui.PrintLine(
+				cui.MakeLine(&cui.Line{
+					Info:      "login error:",
+					InfoColor: escapecode.Red,
+					Text:      "empty username",
+				}))
+
 			continue
 		}
 
@@ -95,7 +102,6 @@ func (user *User) listenToServer() {
 		var buf = make([]byte, 1024)
 		n, err := user.connection.Read(buf)
 		if err != nil {
-			// TODO: tira o Info field do chatline e deixar somento o timestamp
 			user.cui.PrintLineAndExit(1, cui.Line{
 				Info:      "error from server:",
 				InfoColor: escapecode.Red,
