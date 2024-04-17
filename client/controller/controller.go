@@ -79,7 +79,6 @@ func (controller *Controller) getResponseHandler(actionName string) (ResponseHan
 	return handler, nil
 }
 
-// TODO: estudar como implementar midleware
 func (controller *Controller) HandleInput(input string) {
 	input = strings.Trim(input, " ")
 
