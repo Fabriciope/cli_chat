@@ -8,17 +8,17 @@ import (
 )
 
 type consoleDesigner struct {
-	drawingColor escapecode.ColorCode
-	cursorColor  escapecode.ColorCode
+	textColor   escapecode.ColorCode
+	cursorColor escapecode.ColorCode
 
 	cursorCoordinates coordinates
 
-	drawing string
+	text string
 }
 
 func newConsoleDesigner() *consoleDesigner {
 	return &consoleDesigner{
-		drawingColor:      escapecode.DefaultColor,
+		textColor:         escapecode.DefaultColor,
 		cursorColor:       escapecode.DefaultColor,
 		cursorCoordinates: coordinates{x: 0, y: 0},
 	}
@@ -26,7 +26,7 @@ func newConsoleDesigner() *consoleDesigner {
 
 func (designer *consoleDesigner) setColor(drawingColor escapecode.ColorCode) *consoleDesigner {
 	if drawingColor != "" {
-		designer.drawingColor = drawingColor
+		designer.textColor = drawingColor
 	}
 
 	return designer
@@ -57,14 +57,14 @@ func (designer *consoleDesigner) moveCursor(coordinates coordinates) *consoleDes
 	return designer
 }
 
-func (designer *consoleDesigner) setDrawing(drawing string) *consoleDesigner {
-	designer.drawing = drawing
+func (designer *consoleDesigner) setText(drawing string) *consoleDesigner {
+	designer.text = drawing
 
 	return designer
 }
 
 func (designer *consoleDesigner) print() error {
-	if designer.drawing == "" {
+	if designer.text == "" {
 		return errors.New("make a drawing first")
 	}
 
@@ -79,12 +79,12 @@ func (designer *consoleDesigner) print() error {
 		fmt.Print(code)
 	}
 
-	fmt.Print(designer.drawingColor, designer.drawing)
+	fmt.Print(designer.textColor, designer.text)
 	return nil
 }
 
 func (designer *consoleDesigner) printAndResetColors() error {
-	if designer.drawing == "" {
+	if designer.text == "" {
 		return errors.New("make a drawing first")
 	}
 
@@ -99,7 +99,7 @@ func (designer *consoleDesigner) printAndResetColors() error {
 		fmt.Print(code)
 	}
 
-	fmt.Print(designer.drawingColor, designer.drawing, escapecode.Reset)
+	fmt.Print(designer.textColor, designer.text, escapecode.Reset)
 	return nil
 }
 
@@ -118,8 +118,8 @@ func (designer *consoleDesigner) toString() string {
 
 	return fmt.Sprintf(
 		"%s%s%s",
-		designer.drawingColor,
-		designer.drawing,
+		designer.textColor,
+		designer.text,
 		moveCursorCode,
 	)
 }
@@ -140,8 +140,8 @@ func (designer *consoleDesigner) toStringWithResetColors() string {
 	return fmt.Sprintf(
 		"%s%s%s%s",
 		moveCursorCode,
-		designer.drawingColor,
-		designer.drawing,
+		designer.textColor,
+		designer.text,
 		escapecode.Reset,
 	)
 }
@@ -151,7 +151,7 @@ func (designer *consoleDesigner) clearTerminal() {
 }
 
 func (designer *consoleDesigner) resetColors() {
-	designer.drawingColor = escapecode.DefaultColor
+	designer.textColor = escapecode.DefaultColor
 	designer.cursorColor = escapecode.DefaultColor
 	fmt.Print(escapecode.Reset)
 }

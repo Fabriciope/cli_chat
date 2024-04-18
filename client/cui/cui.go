@@ -121,7 +121,7 @@ func (cui *CUI) RenderLoginInterface() {
 	designer.setColor(escapecode.Blue).print()
 	for currentLine, text := range cliChatText {
 		designer.setCursorCoordinates(coordinates{x: int16(currentLine + 2), y: startOfCliChatText})
-		designer.setDrawing(text).print()
+		designer.setText(text).print()
 	}
 	designer.resetColors()
 
@@ -145,7 +145,7 @@ func (cui *CUI) RedrawLoginInterfaceWithError(message string, color escapecode.C
 
 	startOfCliChatText := int16(cui.consoleWidth/2) - int16(cliChatTextWidth/2)
 	designer.moveCursor(coordinates{x: startOfError, y: startOfCliChatText + 15})
-	designer.setDrawing(message).setColor(color).printAndResetColors()
+	designer.setText(message).setColor(color).printAndResetColors()
 
 	startOfLoginBox := startOfCliChatText + 13
 	designer.
@@ -167,7 +167,7 @@ func (cui *CUI) RenderChatInterface() {
 	chatBox := cui.chatBoxToSlice()
 	for currentLine, lineText := range chatBox {
 		designer.setCursorCoordinates(coordinates{x: int16(currentLine + 1), y: 1})
-		designer.setDrawing(lineText).print()
+		designer.setText(lineText).print()
 	}
 	designer.resetColors()
 
@@ -177,7 +177,7 @@ func (cui *CUI) RenderChatInterface() {
 	for currentLine, lineText := range typingBox {
 		currentLine += int(startOfDrawing)
 		designer.setCursorCoordinates(coordinates{x: int16(currentLine), y: 1})
-		designer.setDrawing(lineText).print()
+		designer.setText(lineText).print()
 	}
 }
 
@@ -191,7 +191,7 @@ func (cui *CUI) RedrawTypingBox() {
 	for currentLine, line := range typingBox {
 		currentLine += int(startOfDrawing)
 		designer.setCursorCoordinates(coordinates{x: int16(currentLine), y: 1})
-		designer.setDrawing(line).print()
+		designer.setText(line).print()
 	}
 }
 
@@ -280,12 +280,12 @@ func (cui *CUI) printChatLines() {
 	for key, line := range cui.chatLines {
 		info := newConsoleDesigner().
 			setColor(line.InfoColor).
-			setDrawing(line.Info). // TODO: trocar o nome de drawing para text
+			setText(line.Info).
 			toStringWithResetColors()
 
 		text := newConsoleDesigner().
 			setColor(line.TextColor).
-			setDrawing(line.Text).
+			setText(line.Text).
 			toStringWithResetColors()
 
 		lineText := info + " " + text
@@ -298,7 +298,7 @@ func (cui *CUI) printChatLines() {
 		lineStr := fmt.Sprintf(` │%s%s│ `, lineText, strings.Repeat(" ", amountOfSpaces))
 		designer.setCursorCoordinates(coordinates{x: int16(key + 2), y: 1})
 		designer.eraseLine()
-		designer.setDrawing(lineStr).printAndResetColors()
+		designer.setText(lineStr).printAndResetColors()
 	}
 }
 
@@ -323,12 +323,12 @@ func (cui *CUI) PrintLineAndExit(code uint8, line Line) {
 
 	info := newConsoleDesigner().
 		setColor(line.InfoColor).
-		setDrawing(line.Info).
+		setText(line.Info).
 		toStringWithResetColors()
 
 	text := newConsoleDesigner().
 		setColor(line.TextColor).
-		setDrawing(line.Text).
+		setText(line.Text).
 		toStringWithResetColors()
 
 	lineStr := info + " " + text
@@ -336,7 +336,7 @@ func (cui *CUI) PrintLineAndExit(code uint8, line Line) {
 		setCursorCoordinates(coordinates{
 			x: 1, y: 1,
 		}).
-		setDrawing(lineStr + "\n").
+		setText(lineStr + "\n").
 		printAndResetColors()
 	os.Exit(int(code))
 }
@@ -364,7 +364,7 @@ func (cui *CUI) DrawLoading(length uint, color escapecode.ColorCode) error {
 			return err
 		}
 
-		err = designer.setDrawing(moveLeftCode + loadingString).print()
+		err = designer.setText(moveLeftCode + loadingString).print()
 		if err != nil {
 			return err
 		}
