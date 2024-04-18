@@ -8,13 +8,12 @@ import (
 
 func (handler *InputHandler) SendMessageInChat(message string) {
 	if !*handler.userLoggedIn {
-		handler.cui.PrintLine(
-			cui.MakeLine(&cui.Line{
-				Info:      "warning:",
-				InfoColor: escapecode.BrightYellow,
-				Text:      "you must be logged in to send messages in chat",
-				TextColor: escapecode.Yellow,
-			}))
+		handler.cui.PrintLine(&cui.Line{
+			Info:      "warning:",
+			InfoColor: escapecode.BrightYellow,
+			Text:      "you must be logged in to send messages in chat",
+			TextColor: escapecode.Yellow,
+		})
 
 		return
 	}
@@ -26,10 +25,9 @@ func (handler *InputHandler) SendMessageInChat(message string) {
 		return
 	}
 
-	handler.cui.PrintLine(
-		cui.MakeLine(&cui.Line{
-			Info:      escapecode.TextToBold("me:"),
-			InfoColor: escapecode.DefaultColor,
-			Text:      message,
-		}))
+	handler.cui.PrintLine(&cui.Line{
+		Info:      escapecode.TextToBold("me:"),
+		InfoColor: escapecode.DefaultColor,
+		Text:      message,
+	})
 }

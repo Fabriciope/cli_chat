@@ -64,12 +64,11 @@ func (user *User) Login() {
 	for user.inputScanner.Scan() {
 		username := strings.Trim(user.inputScanner.Text(), " ")
 		if username == "" {
-			user.cui.PrintLine(
-				cui.MakeLine(&cui.Line{
-					Info:      "login error:",
-					InfoColor: escapecode.Red,
-					Text:      "empty username",
-				}))
+			user.cui.PrintLine(&cui.Line{
+				Info:      "login error:",
+				InfoColor: escapecode.Red,
+				Text:      "empty username",
+			})
 
 			continue
 		}

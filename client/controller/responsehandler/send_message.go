@@ -8,12 +8,11 @@ import (
 
 func (handler *ResponseHandler) SendMessageInChatResponse(response dto.Response) {
 	if response.Err {
-		handler.cui.PrintLine(
-			cui.MakeLine(&cui.Line{
-				Info:      "ERROR FROM SERVER:",
-				InfoColor: escapecode.Red,
-				Text:      response.Payload.(string),
-				TextColor: escapecode.Yellow,
-			}))
+		handler.cui.PrintLine(&cui.Line{
+			Info:      "ERROR FROM SERVER:",
+			InfoColor: escapecode.Red,
+			Text:      response.Payload.(string),
+			TextColor: escapecode.Yellow,
+		})
 	}
 }

@@ -11,10 +11,9 @@ import (
 func (handler *ResponseHandler) NewMessageReceived(response dto.Response) {
 	var textMessage dto.TextMessage
 	json.Unmarshal([]byte(response.Payload.(string)), &textMessage)
-	handler.cui.PrintLine(
-		cui.MakeLine(&cui.Line{
-			Info:      escapecode.TextToBold(textMessage.Username + ":"),
-			InfoColor: textMessage.UserColor,
-			Text:      textMessage.Message,
-		}))
+	handler.cui.PrintLine(&cui.Line{
+		Info:      escapecode.TextToBold(textMessage.Username + ":"),
+		InfoColor: textMessage.UserColor,
+		Text:      textMessage.Message,
+	})
 }

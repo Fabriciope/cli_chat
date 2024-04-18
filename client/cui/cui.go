@@ -241,6 +241,8 @@ func (cui *CUI) typingBoxToSlice() (typingBox []string) {
 }
 
 func (cui *CUI) PrintLine(line *Line) {
+	line = addDataToLine(line)
+
 	switch cui.CurrentInterface() {
 	case Interfaces[Login]:
 		cui.RedrawLoginInterfaceWithError((*line).Text, (*line).InfoColor)

@@ -16,11 +16,10 @@ func (handler *ResponseHandler) LoginResponse(response dto.Response) {
 
 	*handler.userLoggedIn = true
 	handler.cui.RenderChatInterface()
-	handler.cui.PrintLine(
-		cui.MakeLine(&cui.Line{
-			Info:      "login status:",
-			InfoColor: escapecode.BrightGreen,
-			Text:      response.Payload.(string),
-			TextColor: escapecode.Green,
-		}))
+	handler.cui.PrintLine(&cui.Line{
+		Info:      "login status:",
+		InfoColor: escapecode.BrightGreen,
+		Text:      response.Payload.(string),
+		TextColor: escapecode.Green,
+	})
 }

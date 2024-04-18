@@ -8,13 +8,12 @@ import (
 
 func (handler *InputHandler) Login(username string) {
 	if *handler.userLoggedIn {
-		handler.cui.PrintLine(
-			cui.MakeLine(&cui.Line{
-				Info:      "invalid operation:",
-				InfoColor: escapecode.Red,
-				Text:      "user is already logged in",
-				TextColor: escapecode.Red,
-			}))
+		handler.cui.PrintLine(&cui.Line{
+			Info:      "invalid operation:",
+			InfoColor: escapecode.Red,
+			Text:      "user is already logged in",
+			TextColor: escapecode.Red,
+		})
 		return
 	}
 
