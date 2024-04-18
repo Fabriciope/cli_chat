@@ -3,29 +3,37 @@ package escapecode
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 )
 
-func ReplaceInEscapeCode[T string | int16](code escapeCode, replaces map[string]T) (string, error) {
-	c := string(code)
-	if !strings.Contains(c, "{") || !strings.Contains(c, "}") {
-		return "", errors.New("invalid code")
-	}
+var (
+	invalidCodeErr     = errors.New("invalid code")
+	invalidReplacesErr = errors.New("invalid replaces")
+)
 
+func ReplaceInEscapeCode[T string | int16](c escapeCode, replaces map[string]T) (string, error) {
+	code := string(c)
+
+	regexPattern := regexp.MustCompile(`(\{ *[a-zA-Z0-9- ]* *})`)
+	allSubstringsMatches := regexPattern.FindAllString(code, -1)
+	if allSubstringsMatches == nil || strings.Contains(code, "{}") {
+		return "", invalidCodeErr
+	}
 	var newCode string
 
-	first := true
-	for key, replace := range replaces {
-		key = fmt.Sprintf("{%s}", key)
-		if !strings.Contains(c, key) {
-			return "", errors.New("invalid replaces")
+	firstLoop := true
+	for _, oldKey := range allSubstringsMatches {
+		toReplace, ok := replaces[strings.TrimSuffix(strings.TrimPrefix(oldKey, "{"), "}")]
+		if !ok {
+			return "", invalidReplacesErr
 		}
 
-		if first {
-			newCode = strings.Replace(c, key, fmt.Sprint(replace), 1)
-			first = false
+		if firstLoop {
+			newCode = strings.Replace(code, oldKey, fmt.Sprint(toReplace), 1)
+			firstLoop = false
 		} else {
-			newCode = strings.Replace(newCode, key, fmt.Sprint(replace), 1)
+			newCode = strings.Replace(newCode, oldKey, fmt.Sprint(toReplace), 1)
 		}
 	}
 
