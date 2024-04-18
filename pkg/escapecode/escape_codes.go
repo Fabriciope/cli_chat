@@ -1,4 +1,3 @@
-// TODO: pensar em colocar o escapecode dentro da pasta pkg no client
 package escapecode
 
 type ColorCode string

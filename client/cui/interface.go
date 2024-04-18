@@ -10,6 +10,6 @@ type CUIInterface interface {
 	RedrawTypingBox()
 	PrintLine(*Line)
 	RedrawLoginInterfaceWithError(string, escapecode.ColorCode)
-	PrintLineForInternalError(string) // TODO: mandar os erros internos para um arquivo de log e criar um package logger para fazer isso
+	PrintLineForInternalError(string)
 	PrintLineAndExit(uint8, Line)
 }

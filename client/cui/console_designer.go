@@ -8,7 +8,6 @@ import (
 )
 
 type consoleDesigner struct {
-	// TODO: implementar backgroundColor
 	drawingColor escapecode.ColorCode
 	cursorColor  escapecode.ColorCode
 
@@ -182,5 +181,3 @@ func (designer *consoleDesigner) eraseLineWithXCoordinates(x int16) {
 
 	fmt.Print(moveCursorCode, escapecode.EraseLine)
 }
-
-// TODO: eraseCurrentLine()

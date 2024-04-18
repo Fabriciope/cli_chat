@@ -11,7 +11,6 @@ import (
 	tsize "github.com/kopoli/go-terminal-size"
 )
 
-// TODO: trocar o nome da variavel para loginInterfaceText
 var cliChatText = [10]string{
 	`░█████╗░██╗░░░░░██╗  ░█████╗░██╗░░██╗░█████╗░████████╗`,
 	`██╔══██╗██║░░░░░██║  ██╔══██╗██║░░██║██╔══██╗╚══██╔══╝`,
@@ -136,7 +135,6 @@ func (cui *CUI) RenderLoginInterface() {
 	cui.currentInterface = Interfaces[Login]
 }
 
-// TODO: limpar erro e nome anterior
 func (cui *CUI) RedrawLoginInterfaceWithError(message string, color escapecode.ColorCode) {
 	defer cui.setCurrentInterface(Interfaces[Login])
 
