@@ -78,8 +78,13 @@ func (user *User) Login() {
 
 		response, err := user.awaitResponseFromServer()
 		if err != nil {
-			user.cui.PrintLineForInternalError(err.Error())
-			continue
+			user.cui.PrintLineAndExit(1, cui.Line{
+				Info:      "error:",
+				InfoColor: escapecode.Red,
+				Text:      "the server is not running",
+				TextColor: escapecode.Red,
+			})
+			return
 		}
 
 		user.controller.HandleResponse(response)
@@ -96,6 +101,7 @@ func (user *User) listenToServer() {
 		var buf = make([]byte, 1024)
 		n, err := user.connection.Read(buf)
 		if err != nil {
+			// TODO: trocar as linhas com diferencas nas cores do info e text
 			user.cui.PrintLineAndExit(1, cui.Line{
 				Info:      "error from server:",
 				InfoColor: escapecode.Red,

@@ -15,9 +15,12 @@ type Line struct {
 	TextColor escapecode.ColorCode
 }
 
+// TODO: nao retornar line, somente fazer referencia ao valor
 func addDataToLine(line *Line) *Line {
 	timeStr := time.Now().Format(time.TimeOnly)
 	line.Info = strings.Trim(fmt.Sprintf("[%s] %s", timeStr, line.Info), " ")
+
+	// TODO: se tiver so o texto, colocar a cor do info a mesma do textcolor
 
 	if line.TextColor == "" {
 		line.TextColor = escapecode.White

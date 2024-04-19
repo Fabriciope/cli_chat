@@ -9,7 +9,7 @@ type CUIInterface interface {
 	CurrentInterface() ConsoleInterface
 	RedrawTypingBox()
 	PrintLine(*Line)
-	RedrawLoginInterfaceWithError(string, escapecode.ColorCode)
+	DrawLoginInterfaceWithMessage(string, escapecode.ColorCode)
 	PrintLineForInternalError(string)
 	PrintLineAndExit(uint8, Line)
 }

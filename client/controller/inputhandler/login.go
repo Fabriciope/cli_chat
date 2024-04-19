@@ -17,8 +17,10 @@ func (handler *InputHandler) Login(username string) {
 		return
 	}
 
+	// TODO: colocar limite de caracteres para o username
+
 	if username == "" {
-		handler.cui.RedrawLoginInterfaceWithError("empty username", escapecode.Red)
+		handler.cui.DrawLoginInterfaceWithMessage("empty username", escapecode.Red)
 		return
 	}
 

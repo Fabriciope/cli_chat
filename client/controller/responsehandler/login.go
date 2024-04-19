@@ -6,11 +6,11 @@ import (
 	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
 
-func (handler *ResponseHandler) LoginResponse(response dto.Response) {
+func (handler *ResponseHandler) Login(response dto.Response) {
 	payload := response.Payload.(string)
 
 	if response.Err {
-		handler.cui.RedrawLoginInterfaceWithError(payload, escapecode.Red)
+		handler.cui.DrawLoginInterfaceWithMessage(payload, escapecode.Red)
 		return
 	}
 

@@ -6,7 +6,7 @@ import (
 	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
 
-func (handler *ResponseHandler) SendMessageInChatResponse(response dto.Response) {
+func (handler *ResponseHandler) SendMessageInChat(response dto.Response) {
 	if response.Err {
 		handler.cui.PrintLine(&cui.Line{
 			Info:      "ERROR FROM SERVER:",

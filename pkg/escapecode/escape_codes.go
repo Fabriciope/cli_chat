@@ -2,6 +2,7 @@ package escapecode
 
 type ColorCode string
 
+// TODO: user https://github.com/jwalton/go-supportscolor para as cores
 const (
 	DefaultColor  ColorCode = "\x1b[39m"
 	Black         ColorCode = "\x1b[30m"

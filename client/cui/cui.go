@@ -114,6 +114,8 @@ func (cui *CUI) adaptNewConsoleSize() {
 }
 
 func (cui *CUI) RenderLoginInterface() {
+	defer cui.setCurrentInterface(Interfaces[Login])
+
 	designer := newConsoleDesigner()
 	designer.clearTerminal()
 
@@ -131,11 +133,9 @@ func (cui *CUI) RenderLoginInterface() {
 		moveCursor(coordinates{
 			x: cui.xCoordinateToTypeLogin, y: startOfLoginBox + 3,
 		})
-
-	cui.currentInterface = Interfaces[Login]
 }
 
-func (cui *CUI) RedrawLoginInterfaceWithError(message string, color escapecode.ColorCode) {
+func (cui *CUI) DrawLoginInterfaceWithMessage(message string, color escapecode.ColorCode) {
 	defer cui.setCurrentInterface(Interfaces[Login])
 
 	cui.RenderLoginInterface()
@@ -245,7 +245,7 @@ func (cui *CUI) PrintLine(line *Line) {
 
 	switch cui.CurrentInterface() {
 	case Interfaces[Login]:
-		cui.RedrawLoginInterfaceWithError((*line).Text, (*line).InfoColor)
+		cui.DrawLoginInterfaceWithMessage((*line).Text, (*line).InfoColor)
 	case Interfaces[Chat]:
 		cui.addChatLine(line)
 		cui.printChatLines()
@@ -319,7 +319,9 @@ func (cui *CUI) adaptChatLinesOnTerminal() {
 	cui.printChatLines()
 }
 
-func (cui *CUI) PrintLineAndExit(code uint8, line Line) {
+func (cui *CUI) PrintLineAndExit(code uint8, l Line) {
+	line := addDataToLine(&l)
+
 	designer := newConsoleDesigner()
 	designer.clearTerminal()
 
