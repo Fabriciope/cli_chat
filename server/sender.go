@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"encoding/json"
 	"net"
 	"sync"
@@ -17,27 +16,31 @@ func newResponseSender(server *Server) *responseSender {
 	return &responseSender{server: server}
 }
 
-func (sender *responseSender) propagateMessage(ctx context.Context, response dto.Response) error {
-	conn := ctx.Value("connection").(*net.TCPConn)
-	responseJson, _ := json.Marshal(response)
-
+func (sender *responseSender) propagateMessage(exceptConn *net.TCPConn, response dto.Response) error {
 	clients := sender.server.clients
 
+	responseJson, _ := json.Marshal(response)
 	wg := new(sync.WaitGroup)
-	wg.Add(len(clients) - 1)
+	sendMsgErr := make(chan error, 1)
+	send := func(addr string) {
+		defer wg.Done()
 
-	sendMsgErr := make(chan error, len(clients)-1)
+		_, err := clients[addr].connection.Write([]byte(responseJson))
+		sendMsgErr <- err
+	}
 
 	sender.server.lock()
 	for addr := range clients {
-		if addr != conn.RemoteAddr().String() {
-			go func() {
-				defer wg.Done()
-
-				_, err := clients[addr].connection.Write([]byte(responseJson))
-				sendMsgErr <- err
-			}()
+		if exceptConn != nil {
+			if addr != exceptConn.RemoteAddr().String() {
+				wg.Add(1)
+				go send(addr)
+			}
+			continue
 		}
+
+		wg.Add(1)
+		go send(addr)
 	}
 
 	go func() {

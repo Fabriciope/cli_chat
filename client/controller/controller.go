@@ -47,17 +47,19 @@ func NewController(conn *net.TCPConn, cui cui.CUIInterface, loggedIn *bool) *Con
 
 func (controller *Controller) setHandlerForEachCommand() {
 	controller.commandsHandlers = CommandsHandlersMap{
-		":login": controller.inputHandler.Login,
+		":login":  controller.inputHandler.Login,
+		":logout": controller.inputHandler.Logout,
 	}
 }
 
 func (controller *Controller) setHandlerForEachResponse() {
 	controller.responsesHandlers = ResponsesHandlersMap{
-		dto.LoginActionName:            controller.responseHandler.LoginResponse,
-		dto.NewClientNotificationName:  controller.responseHandler.NewClient,
-		dto.SendMessageActionName:      controller.responseHandler.SendMessageInChatResponse,
-		dto.NewMessageNotificationName: controller.responseHandler.NewMessageReceived,
-		// TODO: fazer o logout
+		dto.LoginActionName:              controller.responseHandler.Login,
+		dto.NewClientNotificationName:    controller.responseHandler.NewClient,
+		dto.SendMessageActionName:        controller.responseHandler.SendMessageInChat,
+		dto.NewMessageNotificationName:   controller.responseHandler.NewMessageReceived,
+		dto.LogoutActionName:             controller.responseHandler.Logout,
+		dto.ClientDisconnectedActionName: controller.responseHandler.UserDisconnected,
 	}
 }
 

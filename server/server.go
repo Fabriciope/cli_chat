@@ -50,6 +50,7 @@ func (server *Server) setHandlerForEachRequest(handlers *RequestHandlers) {
 	server.handlersForRequests = handlersMap{
 		dto.LoginActionName:       (*handlers).loginHandler,
 		dto.SendMessageActionName: (*handlers).sendMessageInChat,
+		dto.LogoutActionName:      (*handlers).clientLogout,
 	}
 }
 
@@ -79,8 +80,8 @@ func (server *Server) clientHandler(ctx context.Context) {
 
 			if err != nil {
 				errMsg := fmt.Sprintf("server disconnected from client: %s", conn.RemoteAddr().String())
-				sender.sendMessage(conn, dto.Response{
-					Name:    dto.LogoutActionName,
+				sender.propagateMessage(conn, dto.Response{
+					Name:    dto.ClientDisconnectedActionName,
 					Err:     false,
 					Payload: errMsg,
 				})
@@ -92,8 +93,8 @@ func (server *Server) clientHandler(ctx context.Context) {
 			username := client.username
 			errMsg := fmt.Sprintf("%s disconnected from the chat", username)
 			server.removeClient(conn.RemoteAddr().String())
-			sender.sendMessage(conn, dto.Response{
-				Name:    dto.LogoutActionName,
+			sender.propagateMessage(conn, dto.Response{
+				Name:    dto.ClientDisconnectedActionName,
 				Err:     false,
 				Payload: errMsg,
 			})

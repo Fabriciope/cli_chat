@@ -28,7 +28,6 @@ func (rh *RequestHandlers) loginHandler(ctx context.Context, request dto.Request
 	err := rh.service.login(ctx, username)
 	if err != nil {
 		errStr := err.Error()
-		log.Printf("cannot log in %s: %s\n", username, errStr)
 		return &dto.Response{
 			Name:    request.Name,
 			Err:     true,
@@ -59,5 +58,22 @@ func (rh *RequestHandlers) sendMessageInChat(ctx context.Context, request dto.Re
 		Name:    request.Name,
 		Err:     false,
 		Payload: "message sent successfully",
+	}
+}
+
+func (rh *RequestHandlers) clientLogout(ctx context.Context, request dto.Request) *dto.Response {
+	err := rh.service.logout(ctx)
+	if err != nil {
+		return &dto.Response{
+			Name:    request.Name,
+			Err:     true,
+			Payload: err.Error(),
+		}
+	}
+
+	return &dto.Response{
+		Name:    request.Name,
+		Err:     false,
+		Payload: "you have been successfully logged out",
 	}
 }
