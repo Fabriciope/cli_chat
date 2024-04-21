@@ -36,6 +36,28 @@ func (service *Service) login(ctx context.Context, username string) error {
 	return nil
 }
 
+func (service *Service) logout(ctx context.Context) error {
+	conn := ctx.Value("connection").(*net.TCPConn)
+	client, err := service.server.userByRemoteAddr(conn.RemoteAddr().String())
+	if err != nil {
+		return err
+	}
+
+	username := client.username
+	err = service.server.removeClient(client.RemoteAddr())
+	if err != nil {
+		return err
+	}
+
+	service.sender.propagateMessage(conn, dto.Response{
+		Name:    dto.ClientDisconnectedActionName,
+		Err:     false,
+		Payload: fmt.Sprintf("user %s has logged out", username),
+	})
+
+	return nil
+}
+
 func (service *Service) sendMessageToEveryone(ctx context.Context, message string) error {
 	conn := ctx.Value("connection").(*net.TCPConn)
 
@@ -60,24 +82,17 @@ func (service *Service) sendMessageToEveryone(ctx context.Context, message strin
 	})
 }
 
-func (service *Service) logout(ctx context.Context) error {
+func (service *Service) getUsers(ctx context.Context) (users []map[string]string) {
 	conn := ctx.Value("connection").(*net.TCPConn)
-	client, err := service.server.userByRemoteAddr(conn.RemoteAddr().String())
-	if err != nil {
-		return err
+
+	for addr, client := range service.server.clients {
+		if addr != conn.RemoteAddr().String() {
+			users = append(users, map[string]string{
+				"name":  client.username,
+				"color": string(client.color),
+			})
+		}
 	}
 
-	username := client.username
-	err = service.server.removeClient(client.RemoteAddr())
-	if err != nil {
-		return err
-	}
-
-	service.sender.propagateMessage(conn, dto.Response{
-		Name:    dto.ClientDisconnectedActionName,
-		Err:     false,
-		Payload: fmt.Sprintf("user %s has logged out", username),
-	})
-
-	return nil
+	return
 }

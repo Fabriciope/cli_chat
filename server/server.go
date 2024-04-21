@@ -25,6 +25,7 @@ type Server struct {
 	clients             map[string]*client
 }
 
+// TODO: passars o network e a porta como parametros
 func NewServer() (*Server, error) {
 	addr := &net.TCPAddr{IP: net.ParseIP(ip), Port: port}
 	listener, err := net.ListenTCP("tcp", addr)
@@ -48,9 +49,10 @@ func (server *Server) InitServer() {
 
 func (server *Server) setHandlerForEachRequest(handlers *RequestHandlers) {
 	server.handlersForRequests = handlersMap{
+		dto.LogoutActionName:      (*handlers).clientLogout,
 		dto.LoginActionName:       (*handlers).loginHandler,
 		dto.SendMessageActionName: (*handlers).sendMessageInChat,
-		dto.LogoutActionName:      (*handlers).clientLogout,
+		dto.GetUsersActionName:    (*handlers).getUsers,
 	}
 }
 

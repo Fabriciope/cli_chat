@@ -47,8 +47,9 @@ func NewController(conn *net.TCPConn, cui cui.CUIInterface, loggedIn *bool) *Con
 
 func (controller *Controller) setHandlerForEachCommand() {
 	controller.commandsHandlers = CommandsHandlersMap{
-		":login":  controller.inputHandler.Login,
-		":logout": controller.inputHandler.Logout,
+		":login":    controller.inputHandler.Login,
+		":logout":   controller.inputHandler.Logout,
+		":getUsers": controller.inputHandler.GetUsers,
 	}
 }
 
@@ -60,6 +61,8 @@ func (controller *Controller) setHandlerForEachResponse() {
 		dto.NewMessageNotificationName:   controller.responseHandler.NewMessageReceived,
 		dto.LogoutActionName:             controller.responseHandler.Logout,
 		dto.ClientDisconnectedActionName: controller.responseHandler.UserDisconnected,
+		dto.GetUsersActionName:           controller.responseHandler.GetUsers,
+		// TODO: dto.GetUsersCountActionName
 	}
 }
 
