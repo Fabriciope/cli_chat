@@ -49,10 +49,11 @@ func (server *Server) InitServer() {
 
 func (server *Server) setHandlerForEachRequest(handlers *RequestHandlers) {
 	server.handlersForRequests = handlersMap{
-		dto.LogoutActionName:      (*handlers).clientLogout,
-		dto.LoginActionName:       (*handlers).loginHandler,
-		dto.SendMessageActionName: (*handlers).sendMessageInChat,
-		dto.GetUsersActionName:    (*handlers).getUsers,
+		dto.LogoutActionName:        (*handlers).clientLogout,
+		dto.LoginActionName:         (*handlers).loginHandler,
+		dto.SendMessageActionName:   (*handlers).sendMessageInChat,
+		dto.GetUsersActionName:      (*handlers).getUsers,
+		dto.GetUsersCountActionName: (*handlers).getUsersCount,
 	}
 }
 

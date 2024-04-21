@@ -18,6 +18,7 @@ func (handler *ResponseHandler) GetUsers(response dto.Response) {
 			Text:      response.Payload.(string),
 			TextColor: escapecode.Red,
 		})
+		return
 	}
 
 	var users []map[string]string

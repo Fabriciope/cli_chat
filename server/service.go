@@ -96,3 +96,7 @@ func (service *Service) getUsers(ctx context.Context) (users []map[string]string
 
 	return
 }
+
+func (service *Service) getUsersCount() int {
+	return len(service.server.clients) - 1
+}

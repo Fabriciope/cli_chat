@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
@@ -104,5 +105,13 @@ func (rh *RequestHandlers) getUsers(ctx context.Context, request dto.Request) *d
 		Name:    request.Name,
 		Err:     false,
 		Payload: string(usersStr),
+	}
+}
+
+func (rh *RequestHandlers) getUsersCount(ctx context.Context, request dto.Request) *dto.Response {
+	return &dto.Response{
+		Name:    request.Name,
+		Err:     false,
+		Payload: strconv.Itoa(rh.service.getUsersCount()),
 	}
 }
