@@ -16,13 +16,6 @@ func (handler *InputHandler) Login(username string) {
 		return
 	}
 
-	// TODO: colocar limite de caracteres para o username
-
-	if username == "" {
-		handler.cui.DrawLoginInterfaceWithMessage("empty username", escapecode.Red)
-		return
-	}
-
 	request := dto.Request{Name: dto.LoginActionName, Payload: username}
 	err := handler.sender.SendRequest(request)
 	if err != nil {

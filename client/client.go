@@ -69,12 +69,12 @@ func (user *User) Login() {
 	for user.inputScanner.Scan() {
 		username := strings.Trim(user.inputScanner.Text(), " ")
 		if username == "" {
-			user.cui.PrintLine(&cui.Line{
-				Info:      "login error:",
-				Text:      "empty username",
-				TextColor: escapecode.Red,
-			})
+			user.cui.DrawLoginInterfaceWithMessage("empty username", escapecode.Red)
+			continue
+		}
 
+		if len(username) >= 15 {
+			user.cui.DrawLoginInterfaceWithMessage("username must be less than 15 characters", escapecode.Yellow)
 			continue
 		}
 
