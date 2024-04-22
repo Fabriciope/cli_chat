@@ -12,4 +12,5 @@ type CUIInterface interface {
 	DrawLoginInterfaceWithMessage(string, escapecode.ColorCode)
 	PrintLineForInternalError(string)
 	PrintLineAndExit(uint8, Line)
+	SetCloseConnectionFunc(func() error)
 }

@@ -31,6 +31,7 @@ type User struct {
 	loggedIn     *bool
 }
 
+// TODO: passar network e remotePort como parametro
 func NewUser(cui cui.CUIInterface) (*User, error) {
 	remoteAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", remoteIp, remotePort))
 	//localAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", localIp, localPort))
@@ -40,13 +41,17 @@ func NewUser(cui cui.CUIInterface) (*User, error) {
 	}
 
 	loggedIn := false
-	return &User{
+	user := &User{
 		connection:   conn,
 		inputScanner: bufio.NewScanner(os.Stdin),
 		controller:   controller.NewController(conn, cui, &loggedIn),
 		cui:          cui,
 		loggedIn:     &loggedIn,
-	}, nil
+	}
+
+	cui.SetCloseConnectionFunc(user.CloseConnection)
+
+	return user, nil
 }
 
 func (user *User) CloseConnection() error {

@@ -46,6 +46,8 @@ type CUI struct {
 
 	currentInterface ConsoleInterface
 	chatLines        []*Line
+
+	closeConnection func() error
 }
 
 func NewCUI() (*CUI, error) {
@@ -73,6 +75,10 @@ func NewCUI() (*CUI, error) {
 	}
 
 	return cui, nil
+}
+
+func (cui *CUI) SetCloseConnectionFunc(closeFunc func() error) {
+	cui.closeConnection = closeFunc
 }
 
 func (cui *CUI) setCurrentInterface(currentInterface ConsoleInterface) {
@@ -342,6 +348,8 @@ func (cui *CUI) PrintLineAndExit(code uint8, line Line) {
 		}).
 		setText(lineStr + "\n").
 		printAndResetColors()
+
+	cui.closeConnection()
 	os.Exit(int(code))
 }
 
