@@ -10,7 +10,7 @@ import (
 type replaceInt16 map[string]int16
 type replaceString map[string]string
 
-func TestReplaeInEscapeCode(t *testing.T) {
+func TestReplaceInEscapeCodeBatch(t *testing.T) {
 	type myTests[T string | int16] struct {
 		code           escapeCode
 		replaces       map[string]T
@@ -66,7 +66,7 @@ func TestReplaeInEscapeCode(t *testing.T) {
 	}
 }
 
-func TestReplaeInEscapeCodeWithWrongArgs(t *testing.T) {
+func TestReplaceInEscapeCodeWithWrongArgsBatch(t *testing.T) {
 	type myTests[T string | int16] struct {
 		code          escapeCode
 		replaces      map[string]T
@@ -102,5 +102,17 @@ func TestReplaeInEscapeCodeWithWrongArgs(t *testing.T) {
 		assert.NotNil(t, err, fmt.Sprintf("should return an error: %s", msg))
 		assert.EqualError(t, err, data.expectedError.Error(), fmt.Sprintf("error returned wrong: %s", msg))
 		assert.Empty(t, code, msg)
+	}
+}
+
+func BenchmarkReplaceInEscapeCode(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		ReplaceInEscapeCode[string](
+			"my name is {name} {lastname}",
+			map[string]string{
+				"name":     "Fabricio",
+				"lastname": "Pereira Alves",
+			},
+		)
 	}
 }
