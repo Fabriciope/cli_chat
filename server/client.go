@@ -26,7 +26,6 @@ var availableColors = []escapecode.ColorCode{
 	// escapecode.White,
 }
 
-// TODO: adaptar para json
 type client struct {
 	connection *net.TCPConn
 	username   string

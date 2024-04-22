@@ -20,3 +20,5 @@ func NewInputHandler(conn *net.TCPConn, cui cui.CUIInterface, loggedIn *bool) *I
 		sender:       sender.NewRequestSender(conn),
 	}
 }
+
+// TODO: adicionar um input para e comando :availableCommands

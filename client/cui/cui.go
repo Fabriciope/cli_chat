@@ -161,7 +161,6 @@ func (cui *CUI) DrawLoginInterfaceWithMessage(message string, color escapecode.C
 		})
 }
 
-// TODO: exibir os comandos disponiveis
 func (cui *CUI) RenderChatInterface() {
 	defer cui.setCurrentInterface(Interfaces[Chat])
 
