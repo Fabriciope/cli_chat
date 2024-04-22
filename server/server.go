@@ -13,20 +13,15 @@ import (
 	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
 
-const (
-	ip   = "localhost"
-	port = 5000
-)
-
 type Server struct {
 	mutex               *sync.Mutex
 	listener            *net.TCPListener
+	addr                *net.TCPAddr
 	handlersForRequests handlersMap
 	clients             map[string]*client
 }
 
-// TODO: passars o network e a porta como parametros
-func NewServer() (*Server, error) {
+func NewTCPServer(ip string, port int) (*Server, error) {
 	addr := &net.TCPAddr{IP: net.ParseIP(ip), Port: port}
 	listener, err := net.ListenTCP("tcp", addr)
 	if err != nil {
@@ -36,6 +31,7 @@ func NewServer() (*Server, error) {
 	return &Server{
 		mutex:               &sync.Mutex{},
 		listener:            listener,
+		addr:                addr,
 		handlersForRequests: make(handlersMap),
 		clients:             make(map[string]*client),
 	}, nil
@@ -58,7 +54,7 @@ func (server *Server) setHandlerForEachRequest(handlers *RequestHandlers) {
 }
 
 func (server *Server) run() {
-	log.Printf("started server at :%d\n", port)
+	log.Printf("started server at :%d\n", server.addr.AddrPort().Port())
 	for {
 		conn, err := server.listener.AcceptTCP()
 		if err != nil {

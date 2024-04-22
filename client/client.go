@@ -14,15 +14,6 @@ import (
 	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
 
-// TODO: colocar como variaveis globais no container
-const (
-	remoteIp   = "localhost"
-	remotePort = 5000
-
-	localIp   = "localhost"
-	localPort = 3000
-)
-
 type User struct {
 	connection   *net.TCPConn
 	inputScanner *bufio.Scanner
@@ -31,10 +22,8 @@ type User struct {
 	loggedIn     *bool
 }
 
-// TODO: passar network e remotePort como parametro
-func NewUser(cui cui.CUIInterface) (*User, error) {
+func NewUser(remoteIp string, remotePort int, cui cui.CUIInterface) (*User, error) {
 	remoteAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", remoteIp, remotePort))
-	//localAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", localIp, localPort))
 	conn, err := net.DialTCP("tcp", nil, remoteAddr)
 	if err != nil {
 		return nil, err

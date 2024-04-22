@@ -9,6 +9,11 @@ import (
 	"github.com/Fabriciope/cli_chat/pkg/escapecode"
 )
 
+const (
+	remoteIp   = "localhost"
+	remotePort = 5000
+)
+
 func main() {
 	userInterface, err := cui.NewCUI()
 	if err != nil {
@@ -16,7 +21,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	user, err := client.NewUser(userInterface)
+	user, err := client.NewUser(remoteIp, remotePort, userInterface)
 	if err != nil {
 		userInterface.PrintLineAndExit(1, cui.Line{
 			Info:      "error creating client:",
