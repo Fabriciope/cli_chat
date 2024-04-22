@@ -7,6 +7,20 @@ import (
 	"github.com/Fabriciope/cli_chat/client/sender"
 )
 
+var AvailableCommands = [...]string{
+	":logout",
+	":users",
+	":numberOfUsers",
+	":availableCommands",
+}
+
+const (
+	Logout int = iota
+	Users
+	NumberOfUsers
+	Commands
+)
+
 type InputHandler struct {
 	userLoggedIn *bool
 	cui          cui.CUIInterface

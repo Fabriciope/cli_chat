@@ -46,11 +46,16 @@ func NewController(conn *net.TCPConn, cui cui.CUIInterface, loggedIn *bool) *Con
 }
 
 func (controller *Controller) setHandlerForEachCommand() {
+	availableCommand := func(command int) string {
+		return inputhandler.AvailableCommands[command]
+	}
+
 	controller.commandsHandlers = CommandsHandlersMap{
-		":login":            controller.inputHandler.Login,
-		":logout":           controller.inputHandler.Logout,
-		":getUsers":         controller.inputHandler.GetUsers,
-		":getNumberOfUsers": controller.inputHandler.GetNumberOfUsers,
+		":login":                                     controller.inputHandler.Login,
+		availableCommand(inputhandler.Logout):        controller.inputHandler.Logout,
+		availableCommand(inputhandler.Users):         controller.inputHandler.GetUsers,
+		availableCommand(inputhandler.NumberOfUsers): controller.inputHandler.GetNumberOfUsers,
+		availableCommand(inputhandler.Commands):      controller.inputHandler.GetAvailableCommands,
 	}
 }
 
