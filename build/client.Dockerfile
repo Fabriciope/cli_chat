@@ -2,11 +2,12 @@ FROM golang:1.22.1
 
 WORKDIR /app
 
-COPY ./client/ /app/
-COPY ./shared/ /app/shared/
-COPY ./go.mod /app/
+COPY ./../client/ /app/client
+COPY ./../cmd/client/ /app/cmd/
+COPY ./../pkg/ /app/pkg/
+COPY ./../go.mod ./../go.sum /app/
 
-RUN go mod tidy && go mod download
-RUN go build -o /app client
+RUN go mod download && go mod verify
+RUN go build -o /go/bin/app /app/cmd/main.go
 
-CMD ["./client"]
+CMD ["/go/bin/app"]
