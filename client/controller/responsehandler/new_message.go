@@ -15,5 +15,6 @@ func (handler *ResponseHandler) NewMessageReceived(response dto.Response) {
 		Info:      escapecode.TextToBold(textMessage.Username + ":"),
 		InfoColor: textMessage.UserColor,
 		Text:      textMessage.Message,
+		TextColor: escapecode.White,
 	})
 }

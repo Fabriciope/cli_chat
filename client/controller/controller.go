@@ -94,7 +94,6 @@ func (controller *Controller) HandleInput(input string) {
 		if err != nil {
 			controller.cui.PrintLine(&cui.Line{
 				Info:      "error:",
-				InfoColor: escapecode.BrightYellow,
 				Text:      fmt.Sprintf("%s command does not exist", inputSplitted[0]),
 				TextColor: escapecode.Yellow,
 			})

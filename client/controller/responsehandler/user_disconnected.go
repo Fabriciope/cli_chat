@@ -8,7 +8,6 @@ import (
 
 func (handler *ResponseHandler) UserDisconnected(response dto.Response) {
 	handler.cui.PrintLine(&cui.Line{
-		InfoColor: escapecode.Blue,
 		Text:      response.Payload.(string),
 		TextColor: escapecode.Blue,
 	})

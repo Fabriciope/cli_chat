@@ -10,7 +10,6 @@ func (handler *InputHandler) SendMessageInChat(message string) {
 	if !*handler.userLoggedIn {
 		handler.cui.PrintLine(&cui.Line{
 			Info:      "warning:",
-			InfoColor: escapecode.BrightYellow,
 			Text:      "you must be logged in to send messages in chat",
 			TextColor: escapecode.Yellow,
 		})
@@ -29,5 +28,6 @@ func (handler *InputHandler) SendMessageInChat(message string) {
 		Info:      escapecode.TextToBold("me:"),
 		InfoColor: escapecode.DefaultColor,
 		Text:      message,
+		TextColor: escapecode.White,
 	})
 }

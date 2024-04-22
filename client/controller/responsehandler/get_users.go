@@ -14,7 +14,6 @@ func (handler *ResponseHandler) GetUsers(response dto.Response) {
 	if response.Err {
 		handler.cui.PrintLine(&cui.Line{
 			Info:      "ERROR FROM SERVER:",
-			InfoColor: escapecode.Red,
 			Text:      response.Payload.(string),
 			TextColor: escapecode.Red,
 		})
@@ -25,7 +24,6 @@ func (handler *ResponseHandler) GetUsers(response dto.Response) {
 	err := json.Unmarshal([]byte(response.Payload.(string)), &users)
 	if err != nil {
 		handler.cui.PrintLine(&cui.Line{
-			InfoColor: escapecode.Yellow,
 			Text:      response.Payload.(string),
 			TextColor: escapecode.Yellow,
 		})

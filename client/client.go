@@ -66,8 +66,8 @@ func (user *User) Login() {
 		if username == "" {
 			user.cui.PrintLine(&cui.Line{
 				Info:      "login error:",
-				InfoColor: escapecode.Red,
 				Text:      "empty username",
+				TextColor: escapecode.Red,
 			})
 
 			continue
@@ -80,7 +80,6 @@ func (user *User) Login() {
 		if err != nil {
 			user.cui.PrintLineAndExit(1, cui.Line{
 				Info:      "error:",
-				InfoColor: escapecode.Red,
 				Text:      "the server is not running",
 				TextColor: escapecode.Red,
 			})
@@ -101,12 +100,10 @@ func (user *User) listenToServer() {
 		var buf = make([]byte, 1024)
 		n, err := user.connection.Read(buf)
 		if err != nil {
-			// TODO: trocar as linhas com diferencas nas cores do info e text
 			user.cui.PrintLineAndExit(1, cui.Line{
 				Info:      "error from server:",
-				InfoColor: escapecode.Red,
 				Text:      "connection to the server was lost",
-				TextColor: escapecode.Yellow,
+				TextColor: escapecode.Red,
 			})
 		}
 

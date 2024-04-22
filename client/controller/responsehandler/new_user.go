@@ -10,7 +10,6 @@ import (
 
 func (handler *ResponseHandler) NewClient(response dto.Response) {
 	handler.cui.PrintLine(&cui.Line{
-		InfoColor: escapecode.BrightGreen,
 		Text:      strings.Trim(response.Payload.(string), " "),
 		TextColor: escapecode.Green,
 	})

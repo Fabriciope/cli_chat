@@ -241,7 +241,7 @@ func (cui *CUI) typingBoxToSlice() (typingBox []string) {
 }
 
 func (cui *CUI) PrintLine(line *Line) {
-	line = addDataToLine(line)
+	addDataToLine(line)
 
 	switch cui.CurrentInterface() {
 	case Interfaces[Login]:
@@ -319,8 +319,8 @@ func (cui *CUI) adaptChatLinesOnTerminal() {
 	cui.printChatLines()
 }
 
-func (cui *CUI) PrintLineAndExit(code uint8, l Line) {
-	line := addDataToLine(&l)
+func (cui *CUI) PrintLineAndExit(code uint8, line Line) {
+	addDataToLine(&line)
 
 	designer := newConsoleDesigner()
 	designer.clearTerminal()

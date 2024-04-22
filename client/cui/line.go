@@ -16,15 +16,15 @@ type Line struct {
 }
 
 // TODO: nao retornar line, somente fazer referencia ao valor
-func addDataToLine(line *Line) *Line {
-	timeStr := time.Now().Format(time.TimeOnly)
-	line.Info = strings.Trim(fmt.Sprintf("[%s] %s", timeStr, line.Info), " ")
-
-	// TODO: se tiver so o texto, colocar a cor do info a mesma do textcolor
-
+func addDataToLine(line *Line) {
 	if line.TextColor == "" {
-		line.TextColor = escapecode.White
+		(*line).TextColor = escapecode.White
 	}
 
-	return line
+	if line.Info == "" || line.InfoColor == "" {
+		(*line).InfoColor = line.TextColor
+	}
+
+	timeStr := time.Now().Format(time.TimeOnly)
+	(*line).Info = strings.Trim(fmt.Sprintf("[%s] %s", timeStr, line.Info), " ")
 }

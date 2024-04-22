@@ -20,9 +20,8 @@ func main() {
 	if err != nil {
 		userInterface.PrintLineAndExit(1, cui.Line{
 			Info:      "error creating client:",
-			InfoColor: escapecode.Red,
 			Text:      err.Error(),
-			TextColor: escapecode.Yellow,
+			TextColor: escapecode.Red,
 		})
 
 		return
