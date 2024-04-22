@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	remoteIp   = "localhost"
+	remoteIp   = "cli_chat-server"
 	remotePort = 5000
 )
 
