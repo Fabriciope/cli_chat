@@ -117,22 +117,22 @@ func (server *Server) clientHandler(ctx context.Context) {
 			return
 		}
 
-		var response *dto.Response = server.handleRequest(ctx, request)
-		err = sender.sendMessage(conn, *response)
+		response := server.handleRequest(ctx, request)
+		err = sender.sendMessage(conn, response)
 		if err != nil {
 			return
 		}
 	}
 }
 
-func (server *Server) handleRequest(ctx context.Context, request dto.Request) *dto.Response {
+func (server *Server) handleRequest(ctx context.Context, request dto.Request) dto.Response {
 	for actionName, handler := range server.handlersForRequests {
 		if actionName == request.Name {
 			return handler(ctx, request)
 		}
 	}
 
-	return &dto.Response{Name: dto.UnknownActionName, Err: true, Payload: "Action name unknown"}
+	return dto.Response{Name: dto.UnknownActionName, Err: true, Payload: "Action name unknown"}
 }
 
 func (server *Server) lock() {
