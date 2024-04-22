@@ -6,24 +6,13 @@ import (
 	"github.com/Fabriciope/cli_chat/pkg/escapecode"
 )
 
-// TODO: trocar esquema de cores do sistema
 var availableColors = []escapecode.ColorCode{
-	//	escapecode.Black,
-	//	escapecode.Red,
-	//	escapecode.Green,
-	//	escapecode.Yellow,
-	//	escapecode.Blue,
-	escapecode.Magenta,
 	escapecode.Cyan,
-	escapecode.LightGray,
-	escapecode.DarkGray,
-	escapecode.BrightRed,
-	escapecode.BrightGreen,
-	escapecode.BrightYellow,
-	escapecode.BrightBlue,
-	escapecode.BrightMagenta,
-	escapecode.BrightCyan,
-	// escapecode.White,
+	escapecode.Magenta,
+	escapecode.Green,
+	escapecode.Red,
+	escapecode.Yellow,
+	escapecode.Blue,
 }
 
 type client struct {
