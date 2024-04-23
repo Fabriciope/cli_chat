@@ -1,5 +1,6 @@
-# CLI CHAT
-![Design_sem_nome-removebg](https://github.com/Fabriciope/TechNews/assets/79289410/aac614f4-0761-42b1-9764-14b2c08ca00e)
+<h1 align="center">CLI CHAT :speech_balloon:</h1>
+
+![banner-cli-chat](https://github.com/Fabriciope/TechNews/assets/79289410/9d12fb4f-5247-459e-b65d-d822f209df80)
 <br>
 
  Este projeto é um chat usando o protocolo TCP.
@@ -7,7 +8,7 @@
 
 ### Bibliotecas utilizadas
  - [Testify](https://github.com/stretchr/testify): pacote usado para fazer os asserts nos testes.
- - [Go terminal size](https://github.com/stretchr/testify): usado para capturar quando o tamanho do terminal é alterado para fazer a adaptação da interface.
+ - [Go terminal size](https://github.com/stretchr/testify): usado para identificar quando o tamanho do terminal é alterado para fazer a adaptação da interface.
  - [Strip ANSI](https://github.com/acarl005/stripansi): utilizado para remover códigos de escape ANSI das strings usando regex.
 <br>
 
@@ -35,12 +36,12 @@ docker run -it --network cli_chat --name cli_chat-server tcp_chat-server:prod
 ![Captura de tela de 2024-04-22 23-18-10](https://github.com/Fabriciope/TechNews/assets/79289410/20c85a5e-0994-4676-8f32-660b5187726c)
 <br>
 
- Para iniciar o chat do lado do cliente basta executar o comando abaixo trocando o `{n}` por algum número que você queira identificar aquela instância, 
+ Para iniciar o chat do lado do cliente basta executar o comando abaixo trocando o `<n>` por algum número que você queira identificar aquela instância, 
 faça isso a cada novo contêiner de cliente que você iniciar, os números não podem se repetir pois não pode haver dois contêineres com o mesmo nome.
  
- Execute o comando abaixo em uma nova sessão do terminal para cado novo usuário do chat que você queira entrar.
+ Execute o comando abaixo em uma nova sessão do terminal para cada novo usuário do chat que você queira entrar.
 ```bash
-docker run -it --network cli_chat --name cli_chat-client{n} tcp_chat-client:prod
+docker run -it --network cli_chat --name cli_chat-client<n> tcp_chat-client:prod
 ```
 ![docker-run-client](https://github.com/Fabriciope/TechNews/assets/79289410/56405d26-bf97-45e0-9f7e-31acf299d37a)
 <br>
@@ -52,9 +53,9 @@ docker container ls
 ![container-ls](https://github.com/Fabriciope/TechNews/assets/79289410/385f921d-6b43-4820-8fdf-87237e046e11)
 <br>
 
- Caso tenha terminado a execução do servidor ou de algum usuário e queira subir o contêiner novamente, execute o comando abaixo substituindo o `{container name}` pelo nome do respectivo contêiner que você quer reiniciar, para visializar os nomes execute o comando enterior novamente.
+ Caso tenha terminado a execução do servidor ou de algum usuário e queira subir o contêiner novamente, execute o comando abaixo substituindo o `<container name>` pelo nome do respectivo contêiner que você quer reiniciar, para visualizar os nomes execute o comando anterior novamente.
 ```bash
-docker start -i {container name}
+docker start -i <container name>
 ```
 
 <br><br>
