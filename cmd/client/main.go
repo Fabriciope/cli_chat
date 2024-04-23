@@ -6,7 +6,6 @@ import (
 
 	"github.com/Fabriciope/cli_chat/client"
 	"github.com/Fabriciope/cli_chat/client/cui"
-	"github.com/Fabriciope/cli_chat/pkg/escapecode"
 )
 
 const (
@@ -23,12 +22,7 @@ func main() {
 
 	user, err := client.NewUser(remoteIp, remotePort, userInterface)
 	if err != nil {
-		userInterface.PrintLineAndExit(1, cui.Line{
-			Info:      "error creating client:",
-			Text:      err.Error(),
-			TextColor: escapecode.Red,
-		})
-
+		userInterface.PrintLineForInternalError(err.Error())
 		return
 	}
 
