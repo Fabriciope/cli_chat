@@ -8,6 +8,10 @@ import (
 )
 
 var AvailableCommands = [...]string{
+	":h",
+	":help",
+	":q",
+	":quit",
 	":logout",
 	":users",
 	":numberOfUsers",
@@ -19,6 +23,10 @@ const (
 	Users
 	NumberOfUsers
 	Commands
+	H
+	Help
+	Q
+	Quit
 )
 
 type InputHandler struct {
