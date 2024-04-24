@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 
@@ -8,12 +9,22 @@ import (
 	"github.com/Fabriciope/cli_chat/client/cui"
 )
 
-const (
-	remoteIp   = "cli_chat-server"
-	remotePort = 5000
-)
-
 func main() {
+	var (
+		remoteIp   = ""
+		remotePort = 5000
+	)
+
+	flag.StringVar(&remoteIp, "ip", remoteIp, "Remote server IP")
+	flag.IntVar(&remotePort, "port", remotePort, "Remote server port")
+
+	flag.Parse()
+
+	if remoteIp == "" {
+		log.Print("Remote IP is required")
+		os.Exit(1)
+	}
+
 	userInterface, err := cui.NewCUI()
 	if err != nil {
 		log.Print(err)
