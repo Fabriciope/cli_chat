@@ -131,14 +131,6 @@ func (server *Server) handleRequest(ctx context.Context, request dto.Request) dt
 	return dto.Response{Name: dto.UnknownActionName, Err: true, Payload: "Action name unknown"}
 }
 
-func (server *Server) lock() {
-	server.mutex.Lock()
-}
-
-func (server *Server) unlock() {
-	server.mutex.Unlock()
-}
-
 func (server *Server) addClient(ctx context.Context, username string) error {
 	if server.hasClient(username) {
 		return errors.New("user already exists")
@@ -156,9 +148,9 @@ loop:
 	}
 	client := newClient(conn, username, chosenColor)
 
-	server.lock()
+	server.mutex.Lock()
 	server.clients[conn.RemoteAddr().String()] = client
-	server.unlock()
+	server.mutex.Unlock()
 
 	return nil
 }
@@ -169,9 +161,9 @@ func (server *Server) removeClient(remoteAddr string) error {
 		return err
 	}
 
-	server.lock()
+	server.mutex.Lock()
 	delete(server.clients, client.RemoteAddr())
-	server.unlock()
+	server.mutex.Unlock()
 
 	return nil
 }
