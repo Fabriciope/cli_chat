@@ -15,6 +15,7 @@ type Line struct {
 	TextColor escapecode.ColorCode
 }
 
+// TODO: colocar esta funcao como um metodo
 func addDataToLine(line *Line) {
 	if line.TextColor == "" {
 		(*line).TextColor = escapecode.White

@@ -10,6 +10,7 @@ import (
 	"github.com/Fabriciope/cli_chat/pkg/shared/dto"
 )
 
+// TODO: não está funcionando perfeitamente
 func (handler *ResponseHandler) GetUsers(response dto.Response) {
 	if response.Err {
 		handler.cui.PrintLine(&cui.Line{
