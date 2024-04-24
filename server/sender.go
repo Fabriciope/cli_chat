@@ -29,7 +29,7 @@ func (sender *responseSender) propagateMessage(exceptConn *net.TCPConn, response
 		sendMsgErr <- err
 	}
 
-	sender.server.lock()
+	sender.server.mutex.Lock()
 	for addr := range clients {
 		if exceptConn != nil {
 			if addr != exceptConn.RemoteAddr().String() {
@@ -46,7 +46,7 @@ func (sender *responseSender) propagateMessage(exceptConn *net.TCPConn, response
 	go func() {
 		wg.Wait()
 		close(sendMsgErr)
-		sender.server.unlock()
+		sender.server.mutex.Unlock()
 	}()
 
 	for err := range sendMsgErr {
@@ -61,9 +61,9 @@ func (sender *responseSender) propagateMessage(exceptConn *net.TCPConn, response
 func (sender *responseSender) sendMessage(receiver *net.TCPConn, response dto.Response) (err error) {
 	responseJson, _ := json.Marshal(response)
 
-	sender.server.lock()
+	sender.server.mutex.Lock()
 	_, err = receiver.Write(responseJson)
-	sender.server.unlock()
+	sender.server.mutex.Unlock()
 
 	return
 }
