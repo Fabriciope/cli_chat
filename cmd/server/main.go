@@ -20,7 +20,7 @@ func main() {
 
 	server, err := server.NewTCPServer(ip, port)
 	if err != nil {
-		log.Panic(err)
+		log.Fatalf("Error creating server: %v", err)
 	}
 
 	server.InitServer()
