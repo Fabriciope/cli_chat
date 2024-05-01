@@ -8,7 +8,7 @@
  Este projeto é um chat usando o protocolo TCP.
 
 
-### Libraries used
+### Bibliotecas utilizadas
  - [Testify](https://github.com/stretchr/testify): pacote usado para fazer os asserts nos testes.
  - [Go terminal size](https://github.com/stretchr/testify): usado para identificar quando o tamanho do terminal é alterado para fazer a adaptação da interface.
  - [Strip ANSI](https://github.com/acarl005/stripansi): utilizado para remover códigos de escape ANSI das strings usando regex.
@@ -69,7 +69,7 @@ docker start -i <container name>
 
  This project is a chat using the TCP protocol.
  
- ### Bibliotecas utilizadas
+ ### Libraries used
  - [Testify](https://github.com/stretchr/testify): package used to make asserts in tests..
  - [Go terminal size](https://github.com/stretchr/testify): used to identify when the terminal size is changed to adapt the interface.
  - [Strip ANSI](https://github.com/acarl005/stripansi): used to remove ANSI escape codes from strings using regex.
