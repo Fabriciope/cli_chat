@@ -19,14 +19,14 @@ var AvailableCommands = [...]string{
 }
 
 const (
-	Logout int = iota
-	Users
-	NumberOfUsers
-	Commands
-	H
+	H int = iota
 	Help
 	Q
 	Quit
+	Logout
+	Users
+	NumberOfUsers
+	Commands
 )
 
 type InputHandler struct {
