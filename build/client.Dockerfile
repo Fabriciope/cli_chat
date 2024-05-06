@@ -10,4 +10,4 @@ COPY ./../go.mod ./../go.sum /app/
 RUN go mod download && go mod verify
 RUN go build -o /go/bin/app /app/cmd/main.go
 
-CMD ["/go/bin/app"]
+CMD ["/go/bin/app", "--ip", "cli_chat-server", "--port", "5000"]
