@@ -56,6 +56,10 @@ func (controller *Controller) setHandlerForEachCommand() {
 		availableCommand(inputhandler.Users):         controller.inputHandler.GetUsers,
 		availableCommand(inputhandler.NumberOfUsers): controller.inputHandler.GetNumberOfUsers,
 		availableCommand(inputhandler.Commands):      controller.inputHandler.GetAvailableCommands,
+		availableCommand(inputhandler.H):             controller.inputHandler.GetAvailableCommands,
+		availableCommand(inputhandler.Help):          controller.inputHandler.GetAvailableCommands,
+		availableCommand(inputhandler.Q):             controller.inputHandler.Logout,
+		availableCommand(inputhandler.Quit):          controller.inputHandler.Logout,
 	}
 }
 
