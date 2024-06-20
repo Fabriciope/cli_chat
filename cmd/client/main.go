@@ -33,8 +33,8 @@ func main() {
 
 	user, err := client.NewUser(remoteIp, remotePort, userInterface)
 	if err != nil {
-		userInterface.PrintLineForInternalError(err.Error())
-		return
+		log.Printf("error connecting to server: %s", err.Error())
+		os.Exit(1)
 	}
 
 	go userInterface.InitConsoleUserInterface()
