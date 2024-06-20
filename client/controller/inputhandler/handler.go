@@ -8,14 +8,10 @@ import (
 )
 
 var AvailableCommands = [...]string{
-	":h",
-	":help",
-	":q",
-	":quit",
-	":logout",
-	":users",
+    ":h", // NOTE: help
+    ":q", // NOTE: quit
+    ":users", // NOTE: number of users
 	":numberOfUsers",
-	":availableCommands",
 }
 
 const (
