@@ -1,6 +1,6 @@
 <h1 align="center">CLI CHAT :speech_balloon:</h1>
 
-![banner-cli-chat](https://github.com/Fabriciope/TechNews/assets/79289410/9d12fb4f-5247-459e-b65d-d822f209df80)
+<img width="1356" height="799" alt="Image" src="https://github.com/user-attachments/assets/fa449e95-851b-40ca-9810-c15503840a63" />
 <br>
 
 [🌐 Documentation translated into English](#documentation-translated-into-english)
